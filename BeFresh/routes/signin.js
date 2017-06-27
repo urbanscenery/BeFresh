@@ -54,7 +54,7 @@ router.post('/', function(req, res) {
     //4. 암호화된 비밀번호를 이용해 회원가입 완료.
     function(hash, connection, callback) {
       let query = 'insert into users values(?,?,?,?,?,?)';
-      connection.query(query, [req.body.email,hash ,req.body.name, 'a', null, 0], function(err) {
+      connection.query(query, [req.body.email,hash ,req.body.name, 'N', null, 0], function(err) {
         if (err) {
           connection.release();
           callback("insert error : " + err, null);
