@@ -21,7 +21,7 @@ router.post('/', function(req, res){
 		},
 		//2. 입력된 email을 DB에서 찾음
 		function(connection, callback){
-			let getMailPwdQuery = 'select user_email, user_pwd from users where email = ?';
+			let getMailPwdQuery = 'select user_email, user_pwd from users where users.user_email=?';
 			connection.query(getMailPwdQuery, req.body.email, function(err,userdata){
 				if(err){
 					connection.release();
@@ -34,17 +34,23 @@ router.post('/', function(req, res){
 		function(userdata, connection, callback){
 			if(userdata.length===0){
 				connection.release();
-				res.status(401).send("가입된 딩email이 아닙니다.");
+				res.status(401).send({
+					msg : "non signed in user"
+				});
 				callback("non signed in user", null);
 				}
 			else{
-				bcrypt.compare(req.body.password,userdata[0].user_pwd,function(err, login){
+				bcrypt.compare(req.body.pwd, userdata[0].user_pwd, function(err, login){
 					if(err) callback("password compare error : "+ err,null);
 					else{
-						if(login) callback(null, userdata[0].user_email, connection);
+						if(login){
+							callback(null, userdata[0].user_email, connection);
+						}
 						else{
 							connection.release();
-							res.status(401).send("비밀번호가 틀립니다.");
+							res.status(401).send({
+								msg : "wrong password"
+							});
 							callback("wrong password", null);
 						}
 					}
@@ -53,16 +59,21 @@ router.post('/', function(req, res){
 		},
     //4. email이 있고 password 일치시 로그인 성공후 jwt 토큰발행, connection 해제.
     function(userEmail, connection, callback){
+			const secret = req.app.get('jwt-secret');
+			console.log(secret);
+			console.log(userEmail);
       let option = {
         algorithm : 'HS256',
-			  expiresIn : 60 * 60 * 72 // 토큰의 유효기간이 72시간
+			  expiresIn : 3600 * 24 * 10 // 토큰의 유효기간이 10일
       };
       let payload = {
         user_email : userEmail
       };
+			console.log("****************");
       let token = jwt.sign(payload, req.app.get('jwt-secret'), option);
       res.status(201).send(
         {
+					msg : "Success",
           token : token
         });
 			connection.release();
@@ -70,7 +81,9 @@ router.post('/', function(req, res){
     }
 	];
 	async.waterfall(task_array, function(err, result){
-		if(err) console.log(err);
+		if(err){
+			console.log(err);
+		}
 		else console.log(result);
 	});
 });

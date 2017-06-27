@@ -6,13 +6,18 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "async": "^2.5.0",
+    "aws-sdk": "^2.77.0",
+    "bcrypt": "^1.0.2",
     "body-parser": "~1.17.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.3",
     "ejs": "~2.5.6",
     "express": "~4.15.2",
     "express-session": "^1.15.3",
+    "jsonwebtoken": "^7.4.1",
     "morgan": "~1.8.1",
+    "mysql": "^2.13.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "serve-favicon": "~2.4.2"
