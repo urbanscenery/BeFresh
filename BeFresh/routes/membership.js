@@ -98,7 +98,7 @@ router.post('/join', function(req, res){
         }
         else{
           console.log(categoryData[0]);
-          res.status(200).send({
+          res.status(201).send({
             msg : "Success",
             data : {
               category : categoryData[0].membershiptype_id,
@@ -147,31 +147,6 @@ router.post('/join/info', function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      console.log(req.body.name);
-      let joinMembershipQuery = 'insert into memberships values(?,?,?,?,?,?,?)';
-      joinData = [
-        req.body.name,
-        req.body.address,
-        req.body.subAddress,
-        req.body.zipcode,
-        req.body.phone,
-        req.body.etcInformation,
-        userEmail
-      ];
-      connection.query(joinMembershipQuery, joinData, function(err){
-        if(err){
-          res.status(500).send({
-            msg : "500 Join membership err"
-          });
-          connection.release();
-          callback("Join membership query err : "+ err);
-        }
-        else{
-          callback(null, userEmail, connection);
-        }
-      });
-    },
-    function(userEmail, connection, callback){
       let updateUserGroupQuery = 'update users '+
       'set user_group = ? '+
       'where user_email = ?';
@@ -187,6 +162,35 @@ router.post('/join/info', function(req, res){
           });
           connection.release();
           callback("Update user group query err : "+ err);
+        }
+        else{
+          callback(null, userEmail, connection);
+        }
+      });
+    },
+    function(userEmail, connection, callback){
+      let category;
+      if(req.body.category == 1)  category = 'W';
+      else if(req.body.category == 2) category = 'V';
+      else if(req.body.category == 3) category = 'B';
+      let joinMembershipQuery = 'insert into memberships values(?,?,?,?,?,?,?,?)';
+      joinData = [
+        req.body.name,
+        req.body.address,
+        req.body.subAddress,
+        req.body.zipcode,
+        req.body.phone,
+        req.body.etcInformation,
+        category,
+        userEmail
+      ];
+      connection.query(joinMembershipQuery, joinData, function(err){
+        if(err){
+          res.status(500).send({
+            msg : "500 Join membership err"
+          });
+          connection.release();
+          callback("Join membership query err : "+ err);
         }
         else{
           res.status(201).send({
@@ -206,6 +210,131 @@ router.post('/join/info', function(req, res){
 	});
 });
 
+router.get('/info', function(req, res){
+  let task_array = [
+    //1. connection 설정
+    function(callback){
+			pool.getConnection(function(err, connection){
+				if(err){
+          res.status(500).send({
+            msg : "500 Connection error"
+          });
+          callback("getConnecntion error at login: " + err, null);
+        }
+				else callback(null, connection);
+			});
+		},
+    //2. header의 token 값으로 user_email 받아옴.
+    function(connection, callback){
+      let token = req.headers.token;
+      jwt.verify(token, req.app.get('jwt-secret'), function(err, decoded){
+        if(err){
+          res.status(501).send({
+            msg : "501 user authorization error"
+          });
+          callback("JWT decoded err : "+ err, null);
+        }
+        else callback(null, decoded.user_email, connection);
+      });
+    },
+    function(userEmail, connection, callback){
+      let getUserDataQuery = "select user_group from users where user_email = ?";
+      connection.query(getUserDataQuery, userEmail, function(err, userGroup){
+        if(err){
+          res.status(500).send({
+            msg : "500 Get user data error"
+          });
+          connection.release();
+          callback("get userGroup query err : "+err);
+        }
+        else{
+          res.status(200).send({
+            msg : "Success",
+            data : {
+              userGroup : userGroup[0].user_group
+            }
+          });
+          connection.release();
+          callback(null, "succesful find user group");
+        }
+      });
+    }
+  ];
+  async.waterfall(task_array, function(err, result){
+		if(err){
+			console.log(err);
+		}
+		else console.log(result);
+	});
+});
+
+router.get('/info/out', function(req, res){
+  let task_array = [
+    //1. connection 설정
+    function(callback){
+			pool.getConnection(function(err, connection){
+				if(err){
+          res.status(500).send({
+            msg : "500 Connection error"
+          });
+          callback("getConnecntion error at login: " + err, null);
+        }
+				else callback(null, connection);
+			});
+		},
+    //2. header의 token 값으로 user_email 받아옴.
+    function(connection, callback){
+      let token = req.headers.token;
+      jwt.verify(token, req.app.get('jwt-secret'), function(err, decoded){
+        if(err){
+          res.status(501).send({
+            msg : "501 user authorization error"
+          });
+          callback("JWT decoded err : "+ err, null);
+        }
+        else callback(null, decoded.user_email, connection);
+      });
+    },
+    function(userEmail, connection, callback){
+      let deleteMembershipQuery = 'delete from memberships where user_email = ?';
+      connection.query(deleteMembershipQuery, userEmail, function(err){
+        if(err){
+          res.status(500).send({
+            msg : "500 membership out error"
+          });
+          callback("Delete membership query err : " + err, null);
+        }
+        else callback(null, userEmail, connection);
+      });
+    },
+    function(userEmail, connection, callback){
+      let updateUserGroupQuery = 'update users '+
+      'set user_group = ? '+
+      'where user_email = ?';
+      connection.query(updateUserGroupQuery, ['N',userEmail], function(err){
+        if(err){
+          res.status(500).send({
+            msg : "500 membership out error"
+          });
+          callback("Update user group query err : " + err, null);
+        }
+        else{
+          res.status(200).send({
+            msg : "Success"
+          });
+          connection.release();
+          callback(null, "succesful out membership");
+        }
+      });
+    }
+  ];
+  async.waterfall(task_array, function(err, result){
+		if(err){
+			console.log(err);
+		}
+		else console.log(result);
+	});
+});
 
 
 module.exports = router;
