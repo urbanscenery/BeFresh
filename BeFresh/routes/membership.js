@@ -50,7 +50,7 @@ router.get('/', function(req, res){
           res.status(200).send({
             msg : "Success",
             data : {
-              userGroup : userGroup[0].user_group
+              category : userGroup[0].user_group
             }
           });
           connection.release();
@@ -67,7 +67,7 @@ router.get('/', function(req, res){
 	});
 });
 
-//
+//멤버쉽 가입첫창
 router.post('/join', function(req, res){
   let task_array = [
     //1. connection 설정
@@ -97,7 +97,6 @@ router.post('/join', function(req, res){
           callback("get membershiptypes query err : " + err);
         }
         else{
-          console.log(categoryData[0]);
           res.status(201).send({
             msg : "Success",
             data : {
@@ -119,6 +118,7 @@ router.post('/join', function(req, res){
 	});
 });
 
+//멤버쉽 가입정보 입력후 확인눌렀을때
 router.post('/join/info', function(req, res){
   let task_array = [
     //1. connection 설정
@@ -210,6 +210,7 @@ router.post('/join/info', function(req, res){
 	});
 });
 
+//멤버쉽 정보 조회
 router.get('/info', function(req, res){
   let task_array = [
     //1. connection 설정
@@ -251,7 +252,7 @@ router.get('/info', function(req, res){
           res.status(200).send({
             msg : "Success",
             data : {
-              userGroup : userGroup[0].user_group
+              category : userGroup[0].user_group
             }
           });
           connection.release();
@@ -268,6 +269,7 @@ router.get('/info', function(req, res){
 	});
 });
 
+//멤버쉽 탈퇴
 router.get('/info/out', function(req, res){
   let task_array = [
     //1. connection 설정
