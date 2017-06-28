@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 const aws = require('aws-sdk');
 aws.config.loadFromPath('./config/aws_config.json');
-const pool = require('../config/db_pool');
+const pool = require('../../config/db_pool');
 const saltRounds = 10;
 
 router.post('/', function(req, res) {
