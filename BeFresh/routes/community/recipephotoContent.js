@@ -105,5 +105,66 @@ router.get('/:id', function(req,res){
   });
 });
 
+router.post('/comment', function(req, res){
+  let task_array = [
+    //1. connection 설정
+    function(callback){
+			pool.getConnection(function(err, connection){
+				if(err){
+          res.status(500).send({
+            msg : "500 Connection error"
+          });
+          callback("getConnecntion error at login: " + err, null);
+        }
+				else callback(null, connection);
+			});
+		},
+    //2. header의 token 값으로 user_email 받아옴.
+    function(connection, callback){
+      let token = req.headers.token;
+      jwt.verify(token, req.app.get('jwt-secret'), function(err, decoded){
+        if(err){
+          res.status(501).send({
+            msg : "501 user authorization error"
+          });
+          callback("JWT decoded err : "+ err, null);
+        }
+        else callback(null, decoded.user_email, connection);
+      });
+    },
+    function(userEmail, connection, callback){
+      console.log(req.body.comment);
+      let registCommentQuery = 'insert into my_recipe_comment set ?';
+      let data = {
+        myrecipe_comment_text : req.body.comment,
+        myrecipe_comment_post_time : moment().format('MMMM Do YYYY, h:mm:ss a'),
+        myrecipe_id : req.body.id,
+        user_email : userEmail
+      };
+      console.log(data);
+      connection.query(registCommentQuery, data, function(err){
+        if(err){
+          res.status(501).send({
+            msg : "Regist comment err"
+          });
+          connection.release();
+          callback("Regist comment err : "+ err, null);
+        }
+        else{
+          res.status(201).send({
+            msg : "Success"
+          });
+          connection.release();
+          callback(null, "Successful writing comment");
+        }
+      });
+    }
+  ];
+  async.waterfall(task_array, function(err, result) {
+    if (err) console.log(err);
+    else console.log(result);
+  });
+});
+
 
 module.exports = router;

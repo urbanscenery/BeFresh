@@ -75,7 +75,7 @@ router.post('/',upload.single('image'), function(req, res){
             msg : "Success"
           });
           connection.release();
-          callback(null, "Successful writing");
+          callback(null, "Successful writing my recipe");
         }
       });
     }
