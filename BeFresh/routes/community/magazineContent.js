@@ -38,11 +38,11 @@ router.get('/:id', function(req,res){
       });
     },
     function(userEmail, connection,callback){
-      let getDataQuery = 'select * from restaurant where restaurant_id = ?';
+      let getDataQuery = 'select * from magazine where magazine_id = ?';
       connection.query(getDataQuery, req.params.id, function(err, contentData){
         if(err){
           res.status(501).send({
-            msg : "501 get restaurant recommand content error"
+            msg : "501 get magazine content error"
           });
           callback("getDataQuery err : "+ err, null);
         }
@@ -50,17 +50,10 @@ router.get('/:id', function(req,res){
           let authUser = false;
           if(userEmail == contentData[0].user_email) authUser = true;
           let data = {
-            id : contentData[0].restaurant_id,
-            imageUrl : contentData[0].restaurant_image_url,
-            title : contentData[0].restaurant_title,
-            simplelocation : contentData[0].restaurant_location,
-            content : contentData[0].restaurant_content,
-            open : contentData[0].restaurant_open,
-            breaking : contentData[0].restaurant_breakingtime,
-            lastorder : contentData[0].restaurant_lastorder,
-            price : contentData[0].restaurant_price,
-            detaillocation : contentData[0].restaurant_location_detail,
-            locationImage : contentData[0].restaurant_location_image_url,
+            id : contentData[0].magazine_id,
+            imageUrl : contentData[0].magazine_image_url,
+            title : contentData[0].magazine_title,
+            content : contentData[0].magazine_text,
             checkSaveList : false
           };
           callback(null, data, connection);
@@ -73,7 +66,7 @@ router.get('/:id', function(req,res){
         data : contentData
       });
       connection.release();
-      callback(null, "successful find restaurant recommand content Data");
+      callback(null, "successful find magazine content Data");
     }
   ];
   async.waterfall(task_array, function(err, result) {

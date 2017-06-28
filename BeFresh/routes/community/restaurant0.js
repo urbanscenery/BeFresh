@@ -5,12 +5,11 @@ const async = require('async');
 const router = express.Router();
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
-const moment = require('moment');
 //const config = JSON.parse(fs.readFileSync('./config/aws_config.json'));
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 
-router.get('/:id', function(req,res){
+router.get('/', function(req, res){
   let task_array = [
     //1. connection 설정
     function(callback){
@@ -37,43 +36,41 @@ router.get('/:id', function(req,res){
         else callback(null, decoded.user_email, connection);
       });
     },
-    function(userEmail, connection,callback){
-      let getDataQuery = 'select * from restaurant where restaurant_id = ?';
-      connection.query(getDataQuery, req.params.id, function(err, contentData){
+    function(userEmail, connection, callback){
+      let getRestaurantQuery = 'select * from restaurant '+
+      'order by restaurant_post_time '+
+      'limit 6';
+      let data_list = [];
+      connection.query(getRestaurantQuery, function(err,restaurantData){
         if(err){
           res.status(501).send({
-            msg : "501 get restaurant recommand content error"
+            msg : "501 get restaurant recommend error"
           });
-          callback("getDataQuery err : "+ err, null);
+          callback("getRestaurantQuery err : "+ err, null);
         }
         else{
-          let authUser = false;
-          if(userEmail == contentData[0].user_email) authUser = true;
-          let data = {
-            id : contentData[0].restaurant_id,
-            imageUrl : contentData[0].restaurant_image_url,
-            title : contentData[0].restaurant_title,
-            simplelocation : contentData[0].restaurant_location,
-            content : contentData[0].restaurant_content,
-            open : contentData[0].restaurant_open,
-            breaking : contentData[0].restaurant_breakingtime,
-            lastorder : contentData[0].restaurant_lastorder,
-            price : contentData[0].restaurant_price,
-            detaillocation : contentData[0].restaurant_location_detail,
-            locationImage : contentData[0].restaurant_location_image_url,
-            checkSaveList : false
-          };
-          callback(null, data, connection);
+          for(let i = 0 ; i < restaurantData.length ; i++){
+            let data;
+            data = {
+              id : restaurantData[i].restaurant_id,
+              imageUrl : restaurantData[i].restaurant_image_url,
+              title : restaurantData[i].restaurant_title,
+              location : restaurantData[i].restaurant_location,
+              checkSaveList : false
+            };
+            data_list.push(data);
+          }
+          callback(null, data_list, userEmail, connection);
         }
       });
     },
-    function(contentData, connection, callback){
+    function(restaurantData, userEmail, connection, callback){
       res.status(200).send({
         msg : "Success",
-        data : contentData
+        data : restaurantData
       });
       connection.release();
-      callback(null, "successful find restaurant recommand content Data");
+      callback(null, "successful find restaurant data");
     }
   ];
   async.waterfall(task_array, function(err, result) {
@@ -81,6 +78,7 @@ router.get('/:id', function(req,res){
     else console.log(result);
   });
 });
+
 
 
 

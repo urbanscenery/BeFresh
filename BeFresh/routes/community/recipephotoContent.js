@@ -56,7 +56,8 @@ router.get('/:id', function(req,res){
             title : contentData[0].myrecipe_title,
             saveCount : contentData[0].myrecipe_count,
             checkSaveList : false,
-            content : contentData[0].myrecipe_text
+            content : contentData[0].myrecipe_text,
+            writerAuth : authUser
           };
           callback(null, data, connection);
         }
