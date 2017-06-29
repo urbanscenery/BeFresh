@@ -9,7 +9,7 @@ const moment = require('moment');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 
-router.get('/', function(req, res){
+router.get('/:id', function(req, res){
   let task_array = [
     //1. connection 설정
     function(callback){
@@ -23,19 +23,38 @@ router.get('/', function(req, res){
 				else callback(null, connection);
 			});
 		},
-    //2. header의 token 값으로 user_email 받아옴.
     function(connection, callback){
-      let token = req.headers.token;
-      jwt.verify(token, req.app.get('jwt-secret'), function(err, decoded){
+      let getReviewQuery = 'select * from reviews where recipe_id = ? '+
+      'order by review_post_time ';
+      connection.query(getReviewQuery, req.params.id, function(err, reviewData){
         if(err){
           res.status(501).send({
-            msg : "501 user authorization error"
+            msg : "501 get Recipe error"
           });
-          callback("JWT decoded err : "+ err, null);
+          callback("getRecipeQuery err : "+ err, null);
         }
-        else callback(null, decoded.user_email, connection);
+        else{
+          let data_list = [];
+          for(let i = 0; i < reviewData.length; i++){
+            let review = {
+              writer : reviewData[i].user_email,
+              content : reviewData[i].review_content,
+              score : reviewData[i].review_score
+            };
+            data_list.push(review);
+          }
+          callback(null, data_list, connection);
+        }
       });
     },
+    function(reviewData, connection, callback){
+      res.status(200).send({
+        msg : "Success",
+        data : {
+          review : reviewData
+        }
+      });
+    }
   ];
   async.waterfall(task_array, function(err, result) {
     if (err) console.log(err);

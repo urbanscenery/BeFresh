@@ -9,7 +9,7 @@ const moment = require('moment');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 
-router.get('/', function(req, res){
+router.get('/:id', function(req, res){
   let task_array = [
     //1. connection 설정
     function(callback){
@@ -23,19 +23,27 @@ router.get('/', function(req, res){
 				else callback(null, connection);
 			});
 		},
-    //2. header의 token 값으로 user_email 받아옴.
     function(connection, callback){
-      let token = req.headers.token;
-      jwt.verify(token, req.app.get('jwt-secret'), function(err, decoded){
+      let getCardQuery = 'select recipe_method from recipes where recipe_id = ?';
+      connection.query(getCardQuery, req.params.id, function(err, recipeData){
         if(err){
           res.status(501).send({
-            msg : "501 user authorization error"
+            msg : "501 get Recipe method error"
           });
-          callback("JWT decoded err : "+ err, null);
+          callback("getCardQuery err : "+ err, null);
         }
-        else callback(null, decoded.user_email, connection);
+        else{
+          let method = JSON.parse(recipeData[0].recipe_method);
+          callback(null, method, connection);
+        }
       });
     },
+    function(method, connection, callback){
+      res.status(200).send({
+        msg : "Success",
+        data : method
+      });
+    }
   ];
   async.waterfall(task_array, function(err, result) {
     if (err) console.log(err);
