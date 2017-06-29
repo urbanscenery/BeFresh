@@ -79,7 +79,7 @@ router.get('/:searching', function(req, res){
         }
       });
       connection.release();
-      callback(null, "successful find wellbeing recipe");
+      callback(null, "successful find searhing recipe");
     }
   ];
   async.waterfall(task_array, function(err, result) {
