@@ -63,6 +63,67 @@ router.get('/:id', function(req, res){
 });
 
 
+router.post('/registration', function(req, res){
+  let task_array = [
+    //1. connection 설정
+    function(callback){
+			pool.getConnection(function(err, connection){
+				if(err){
+          res.status(500).send({
+            msg : "500 Connection error"
+          });
+          callback("getConnecntion error at login: " + err, null);
+        }
+				else callback(null, connection);
+			});
+		},
+    //2. header의 token 값으로 user_email 받아옴.
+    function(connection, callback){
+      let token = req.headers.token;
+      jwt.verify(token, req.app.get('jwt-secret'), function(err, decoded){
+        if(err){
+          res.status(501).send({
+            msg : "501 user authorization error"
+          });
+          callback("JWT decoded err : "+ err, null);
+        }
+        else callback(null, decoded.user_email, connection);
+      });
+    },
+    function(userEmail, connection, callback){
+      let registReviewQuery = 'insert into reviews set ?';
+      let data = {
+        review_content : req.body.content,
+        review_score : req.body.score,
+        review_post_time : moment().format('MMMM Do YYYY, h:mm:ss a'),
+        recipe_id : req.body.id,
+        user_email : req.body.userEmail
+      };
+      connection.query(registReviewQuery, data, function(err){
+        if(err){
+          res.status(501).send({
+            msg : "Regist review err"
+          });
+          connection.release();
+          callback("Regist review err : "+ err, null);
+        }
+        else{
+          res.status(201).send({
+            msg : "Success"
+          });
+          connection.release();
+          callback(null, "Successful writing review");
+        }
+      });
+    }
+  ];
+  async.waterfall(task_array, function(err, result) {
+    if (err) console.log(err);
+    else console.log(result);
+  });
+});
+
+
 
 
 module.exports = router;

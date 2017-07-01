@@ -134,7 +134,6 @@ router.post('/comment', function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      console.log(req.body.comment);
       let registCommentQuery = 'insert into my_recipe_comment set ?';
       let data = {
         myrecipe_comment_text : req.body.comment,

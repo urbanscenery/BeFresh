@@ -43,6 +43,8 @@ router.get('/:id', function(req, res){
         msg : "Success",
         data : method
       });
+      connection.release();
+      callback(null, "successful send data");
     }
   ];
   async.waterfall(task_array, function(err, result) {

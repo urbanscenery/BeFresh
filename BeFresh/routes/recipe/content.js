@@ -100,6 +100,8 @@ router.get('/:id', function(req, res){
           review : reviewData
         }
       });
+      connection.release();
+      callback(null, "successful send data");
     }
   ];
   async.waterfall(task_array, function(err, result) {

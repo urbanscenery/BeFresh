@@ -5,12 +5,14 @@ var signin = require('./login/signin');
 var membership = require('./membership/index');
 var community = require('./community/index');
 var recipe = require('./recipe/index');
+var mypage = require('./mypage/index');
 
 router.use('/login', login);
 router.use('/signin', signin);
 router.use('/membership', membership);
 router.use('/community', community);
 router.use('/recipe', recipe);
+router.use('/mypage', mypage);
 
 
 module.exports = router;
