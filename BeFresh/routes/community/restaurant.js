@@ -64,7 +64,45 @@ router.get('/', function(req, res){
         }
       });
     },
-    function(restaurantData, userEmail, connection, callback){
+    function(data, userEmail, connection, callback){
+      let getSavelistQuery = 'select my_savelist_origin_id from my_savelist '+
+      'where user_email = ? and my_savelist_from = 3';
+      connection.query(getSavelistQuery, userEmail, function(err, saveData){
+        if(err){
+          res.status(501).send({
+            msg : "501 access save list data error"
+          });
+          callback("getSavelistQuery err : "+ err, null);
+        }
+        else{
+          callback(null, saveData, data, userEmail, connection);
+        }
+      });
+    },
+    function(saveData, data, userEmail, connection, callback){
+      let count = 0;
+      console.log(data.length);
+      async.whilst(
+        function(){
+          return count < data.length;
+        },
+        function(loop){
+          console.log(count);
+          for(let i = 0 ; i < saveData.length; i++){
+            if(data[count].id == saveData[i].my_savelist_origin_id){
+              data[count].checkSaveList = true;
+            }
+          }
+          count++;
+          console.log("here");
+          loop(null);
+        },
+        function(err){
+          callback(null,data, connection);
+        }
+      );
+    },
+    function(restaurantData, connection, callback){
       res.status(200).send({
         msg : "Success",
         data : restaurantData

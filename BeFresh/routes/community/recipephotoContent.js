@@ -59,9 +59,32 @@ router.get('/:id', function(req,res){
             content : contentData[0].myrecipe_text,
             writerAuth : authUser
           };
-          callback(null, data, connection);
+          callback(null, data,userEmail ,connection);
         }
       });
+    },
+    function(data, userEmail, connection, callback){
+      let getSavelistQuery = 'select my_savelist_origin_id from my_savelist '+
+      'where user_email = ? and my_savelist_from = 2';
+      connection.query(getSavelistQuery, userEmail, function(err, saveData){
+        if(err){
+          res.status(501).send({
+            msg : "501 access save list data error"
+          });
+          callback("getSavelistQuery err : "+ err, null);
+        }
+        else{
+          callback(null, saveData, data, userEmail, connection);
+        }
+      });
+    },
+    function(saveData, data, userEmail, connection, callback){
+      for(let i = 0 ; i < saveData.length; i++){
+        if(data.id == saveData[i].my_savelist_origin_id){
+          data.checkSaveList = true;
+        }
+      }
+      callback(null,data, connection);
     },
     function(contentData, connection, callback){
       let getCommentQuery = 'select * from my_recipe_comment '+
@@ -141,7 +164,6 @@ router.post('/comment', function(req, res){
         myrecipe_id : req.body.id,
         user_email : userEmail
       };
-      console.log(data);
       connection.query(registCommentQuery, data, function(err){
         if(err){
           res.status(501).send({

@@ -51,7 +51,6 @@ router.get('/', function(req, res){
         else{
           for(let i = 0 ; i < magazineData.length ; i++){
             let data;
-            //매거진 콘텐츠 길이 제한하는거 서버가 해야하나?
             data = {
               id : magazineData[i].magazine_id,
               imageUrl : magazineData[i].magazine_image_url,
@@ -61,9 +60,47 @@ router.get('/', function(req, res){
             };
             data_list.push(data);
           }
-          callback(null, data_list, connection);
+          callback(null, data_list, userEmail, connection);
         }
       });
+    },
+    function(data, userEmail, connection, callback){
+      let getSavelistQuery = 'select my_savelist_origin_id from my_savelist '+
+      'where user_email = ? and my_savelist_from = 4';
+      connection.query(getSavelistQuery, userEmail, function(err, saveData){
+        if(err){
+          res.status(501).send({
+            msg : "501 access save list data error"
+          });
+          callback("getSavelistQuery err : "+ err, null);
+        }
+        else{
+          callback(null, saveData, data, userEmail, connection);
+        }
+      });
+    },
+    function(saveData, data, userEmail, connection, callback){
+      let count = 0;
+      console.log(data.length);
+      async.whilst(
+        function(){
+          return count < data.length;
+        },
+        function(loop){
+          console.log(count);
+          for(let i = 0 ; i < saveData.length; i++){
+            if(data[count].id == saveData[i].my_savelist_origin_id){
+              data[count].checkSaveList = true;
+            }
+          }
+          count++;
+          console.log("here");
+          loop(null);
+        },
+        function(err){
+          callback(null,data, connection);
+        }
+      );
     },
     function(magazineData, connection, callback){
       res.status(200).send({
