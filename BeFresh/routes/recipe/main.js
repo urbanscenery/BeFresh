@@ -31,6 +31,7 @@ router.get('/wellbeing', function(req, res){
           res.status(501).send({
             msg : "501 user authorization error"
           });
+          connection.release();
           callback("JWT decoded err : "+ err, null);
         }
         else callback(null, decoded.user_email, connection);
@@ -48,16 +49,22 @@ router.get('/wellbeing', function(req, res){
           callback("getRecipeQuery err : "+ err, null);
         }
         else{
-          let jsonData = JSON.parse(currentWeek[0].recipe_image);
-          let currentData = {
-            id : currentWeek[0].recipe_id,
-            image_url : jsonData.image[0].url,
-            title : currentWeek[0].recipe_title,
-            subtitle : currentWeek[0].recipe_subtitle,
-            difficulty : currentWeek[0].recipe_difficulty,
-            cookingTime : currentWeek[0].recipe_cookingTime,
-            checkSaveList : false
-          };
+          let currentData;
+          if(currentWeek.length === 0){
+            currentData = null;
+          }
+          else{
+            let jsonData = JSON.parse(currentWeek[0].recipe_image);
+            currentData = {
+              id : currentWeek[0].recipe_id,
+              image_url : jsonData.image[0].url,
+              title : currentWeek[0].recipe_title,
+              subtitle : currentWeek[0].recipe_subtitle,
+              difficulty : currentWeek[0].recipe_difficulty,
+              cookingTime : currentWeek[0].recipe_cookingTime,
+              checkSaveList : false
+            };
+          }
           callback(null, currentData, userEmail, connection);
         }
       });
@@ -149,16 +156,22 @@ router.get('/vegetarian', function(req, res){
           callback("getRecipeQuery err : "+ err, null);
         }
         else{
-          let jsonData = JSON.parse(currentWeek[0].recipe_image);
-          let currentData = {
-            id : currentWeek[0].recipe_id,
-            image_url : jsonData.image[0].url,
-            title : currentWeek[0].recipe_title,
-            subtitle : currentWeek[0].recipe_subtitle,
-            difficulty : currentWeek[0].recipe_difficulty,
-            cookingTime : currentWeek[0].recipe_cookingTime,
-            checkSaveList : false
-          };
+          let currentData;
+          if(currentWeek.length === 0){
+            currentData = null;
+          }
+          else{
+            let jsonData = JSON.parse(currentWeek[0].recipe_image);
+            currentData = {
+              id : currentWeek[0].recipe_id,
+              image_url : jsonData.image[0].url,
+              title : currentWeek[0].recipe_title,
+              subtitle : currentWeek[0].recipe_subtitle,
+              difficulty : currentWeek[0].recipe_difficulty,
+              cookingTime : currentWeek[0].recipe_cookingTime,
+              checkSaveList : false
+            };
+          }
           callback(null, currentData, userEmail, connection);
         }
       });

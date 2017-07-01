@@ -7,10 +7,8 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
-//var login = require('./routes/login');
-//var signin = require('./routes/signin');
 var config = require('./config/secretKey');
-//var membership = require('./routes/membership');
+var scheduler = require('./routes/mypage/schedule');
 
 var app = express();
 

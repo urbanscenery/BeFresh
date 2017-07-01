@@ -31,6 +31,7 @@ router.get('/', function(req, res){
           res.status(501).send({
             msg : "501 user authorization error"
           });
+          connection.release();
           callback("JWT decoded err : "+ err, null);
         }
         else callback(null, decoded.user_email, connection);
@@ -81,7 +82,6 @@ router.get('/', function(req, res){
     },
     function(saveData, data, userEmail, connection, callback){
       let count = 0;
-      console.log(data.length);
       async.whilst(
         function(){
           return count < data.length;
@@ -94,7 +94,6 @@ router.get('/', function(req, res){
             }
           }
           count++;
-          console.log("here");
           loop(null);
         },
         function(err){

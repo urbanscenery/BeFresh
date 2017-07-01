@@ -44,6 +44,7 @@ router.get('/populity', function(req, res){
           res.status(501).send({
             msg : "501 user authorization error"
           });
+          connection.release();
           callback("JWT decoded err : "+ err, null);
         }
         else callback(null, decoded.user_email, connection);
@@ -93,7 +94,6 @@ router.get('/populity', function(req, res){
     },
     function(saveData, data, userEmail, connection, callback){
       let count = 0;
-      console.log(data.length);
       async.whilst(
         function(){
           return count < data.length;
@@ -106,7 +106,6 @@ router.get('/populity', function(req, res){
             }
           }
           count++;
-          console.log("here");
           loop(null);
         },
         function(err){
@@ -185,7 +184,7 @@ router.get('/newest', function(req, res){
     },
     function(data, userEmail, connection, callback){
       let getSavelistQuery = 'select my_savelist_origin_id from my_savelist '+
-      'where user_email = ? and my_savelist_from = 4';
+      'where user_email = ? and my_savelist_from = 2';
       connection.query(getSavelistQuery, userEmail, function(err, saveData){
         if(err){
           res.status(501).send({
@@ -200,7 +199,6 @@ router.get('/newest', function(req, res){
     },
     function(saveData, data, userEmail, connection, callback){
       let count = 0;
-      console.log(data.length);
       async.whilst(
         function(){
           return count < data.length;
@@ -213,7 +211,6 @@ router.get('/newest', function(req, res){
             }
           }
           count++;
-          console.log("here");
           loop(null);
         },
         function(err){
