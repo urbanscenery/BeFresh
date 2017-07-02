@@ -5,6 +5,7 @@ const async = require('async');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const aws = require('aws-sdk');
+const moment = require('moment');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 const saltRounds = 10;
@@ -73,8 +74,14 @@ router.post('/', function(req, res) {
     }
   ];
   async.waterfall(task_array, function(err, result) {
-    if (err) console.log(err);
-    else console.log(result);
+    if (err){
+      err = moment().format('MM/DDahh:mm:ss//') + err;
+      console.log(err);
+    }
+    else{
+      result = moment().format('MM/DDahh:mm:ss//') + result;
+      console.log(result);
+    }
   });
 });
 

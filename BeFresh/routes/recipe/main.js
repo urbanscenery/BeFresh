@@ -39,13 +39,14 @@ router.get('/wellbeing', function(req, res){
     },
     function(userEmail, connection, callback){
       let currentTime = moment().format('YYYY-MM-DD');
-      let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime from recipes '+
+      let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime recipe_tag from recipes '+
       'where recipe_post_time = week(?) and recipe_category = ?';
       connection.query(getRecipeQuery, [currentTime, 'W'], function(err, currentWeek){
         if(err){
           res.status(501).send({
             msg : "501 get wellbeing recipe data error"
           });
+          connection.release();
           callback("getRecipeQuery err : "+ err, null);
         }
         else{
@@ -62,6 +63,7 @@ router.get('/wellbeing', function(req, res){
               subtitle : currentWeek[0].recipe_subtitle,
               difficulty : currentWeek[0].recipe_difficulty,
               cookingTime : currentWeek[0].recipe_cookingTime,
+              hashtag : currentWeek[0].recipe_tag,
               checkSaveList : false
             };
           }
@@ -71,7 +73,7 @@ router.get('/wellbeing', function(req, res){
     },
     function(currentData, userEmail, connection, callback){
       let currentTime = moment().format('YYYY-MM-DD');
-      let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime from recipes '+
+      let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag from recipes '+
       'where recipe_post_time < week(?) and recipe_category = ?';
       let data_list = [];
       connection.query(getRecipeQuery, [currentTime, 'W'], function(err, lastWeek){
@@ -91,6 +93,7 @@ router.get('/wellbeing', function(req, res){
               subtitle : lastWeek[i].recipe_subtitle,
               difficulty : lastWeek[i].recipe_difficulty,
               cookingTime : lastWeek[i].recipe_cookingTime,
+              hashtag : lastWeek[i].recipe_tag,
               checkSaveList : false
             };
             data_list.push(lastData);
@@ -112,8 +115,14 @@ router.get('/wellbeing', function(req, res){
     }
   ];
   async.waterfall(task_array, function(err, result) {
-    if (err) console.log(err);
-    else console.log(result);
+    if (err){
+      err = moment().format('MM/DDahh:mm:ss//') + err;
+      console.log(err);
+    }
+    else{
+      result = moment().format('MM/DDahh:mm:ss//') + result;
+      console.log(result);
+    }
   });
 });
 
@@ -139,6 +148,7 @@ router.get('/vegetarian', function(req, res){
           res.status(501).send({
             msg : "501 user authorization error"
           });
+          connection.release();
           callback("JWT decoded err : "+ err, null);
         }
         else callback(null, decoded.user_email, connection);
@@ -146,13 +156,14 @@ router.get('/vegetarian', function(req, res){
     },
     function(userEmail, connection, callback){
       let currentTime = moment().format('YYYY-MM-DD');
-      let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime from recipes '+
+      let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag from recipes '+
       'where recipe_post_time = week(?) and recipe_category = ?';
       connection.query(getRecipeQuery, [currentTime, 'V'], function(err, currentWeek){
         if(err){
           res.status(501).send({
             msg : "501 get vegetarian recipe data error"
           });
+          connection.release();
           callback("getRecipeQuery err : "+ err, null);
         }
         else{
@@ -169,6 +180,7 @@ router.get('/vegetarian', function(req, res){
               subtitle : currentWeek[0].recipe_subtitle,
               difficulty : currentWeek[0].recipe_difficulty,
               cookingTime : currentWeek[0].recipe_cookingTime,
+              hashtag : currentWeek[0].recipe_tag,
               checkSaveList : false
             };
           }
@@ -178,7 +190,7 @@ router.get('/vegetarian', function(req, res){
     },
     function(currentData, userEmail, connection, callback){
       let currentTime = moment().format('YYYY-MM-DD');
-      let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime from recipes '+
+      let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag from recipes '+
       'where recipe_post_time < week(?) and recipe_category = ?';
       let data_list = [];
       connection.query(getRecipeQuery, [currentTime, 'V'], function(err, lastWeek){
@@ -198,6 +210,7 @@ router.get('/vegetarian', function(req, res){
               subtitle : lastWeek[i].recipe_subtitle,
               difficulty : lastWeek[i].recipe_difficulty,
               cookingTime : lastWeek[i].recipe_cookingTime,
+              hashtag : lastWeek[i].recipe_tag,
               checkSaveList : false
             };
             data_list.push(lastData);
@@ -219,8 +232,14 @@ router.get('/vegetarian', function(req, res){
     }
   ];
   async.waterfall(task_array, function(err, result) {
-    if (err) console.log(err);
-    else console.log(result);
+    if (err){
+      err = moment().format('MM/DDahh:mm:ss//') + err;
+      console.log(err);
+    }
+    else{
+      result = moment().format('MM/DDahh:mm:ss//') + result;
+      console.log(result);
+    }
   });
 });
 

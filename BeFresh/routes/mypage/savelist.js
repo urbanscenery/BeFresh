@@ -5,7 +5,6 @@ const async = require('async');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
-//const config = JSON.parse(fs.readFileSync('./config/aws_config.json'));
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 
@@ -51,6 +50,33 @@ router.get('/:id/:from', function(req, res){
           callback(null, savlistData, userEmail, connection);
         }
       });
+    },
+    function(saveList, userEmail, connection, callback){
+      if(req.params.from == 2){
+        let id = req.params.id;
+        id = id.toString();
+        let updateCountQuery = '';
+        if(saveList.length === 0){
+          updateCountQuery += 'update my_recipe set myrecipe_count = myrecipe_count+1 where myrecipe_id = '+id+';';
+        }
+        else{
+          updateCountQuery += 'update my_recipe set myrecipe_count = myrecipe_count-1 where myrecipe_id = '+id +';';
+        }
+        connection.query(updateCountQuery, function(err){
+          if(err){
+            res.status(501).send({
+              msg : "Update count err"
+            });
+            connection.release();
+            callback("updateCountQuery err : "+ err, null);
+          }
+          else{
+            callback(null, saveList, userEmail, connection);
+          }
+        });
+      }
+      else callback(null, saveList, userEmail, connection);
+
     },
     function(saveList, userEmail, connection, callback){
       if(saveList.length === 0){
@@ -100,10 +126,16 @@ router.get('/:id/:from', function(req, res){
       }
     }
   ];
-  async.waterfall(task_array, function(err, result){
-		if(err) console.log(err);
-		else console.log(result);
-	});
+  async.waterfall(task_array, function(err, result) {
+    if (err){
+      err = moment().format('MM/DDahh:mm:ss//') + err;
+      console.log(err);
+    }
+    else{
+      result = moment().format('MM/DDahh:mm:ss//') + result;
+      console.log(result);
+    }
+  });
 });
 
 module.exports = router;

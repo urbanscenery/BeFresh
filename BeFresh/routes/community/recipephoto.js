@@ -1,26 +1,12 @@
-//52.78.124.103:3000/lists
+//52.78.124.103:3412/community/recipephoto
 const express = require('express');
 const aws = require('aws-sdk');
-const multer = require('multer');
 const async = require('async');
-const multerS3 = require('multer-s3');
 const router = express.Router();
-const fs = require('fs');
 const jwt = require('jsonwebtoken');
-//const config = JSON.parse(fs.readFileSync('./config/aws_config.json'));
+const moment = require('moment');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
-const s3 = new aws.S3();
-const upload = multer({
-    storage: multerS3({
-        s3: s3,
-        bucket: 'befreshcommunity',
-        acl: 'public-read',
-        key: function(req, file, cb) {
-            cb(null, Date.now() + '.' + file.originalname.split('.').pop());
-        }
-    })
-});
 
 router.get('/populity', function(req, res){
   let task_array = [
@@ -31,7 +17,7 @@ router.get('/populity', function(req, res){
           res.status(500).send({
             msg : "500 Connection error"
           });
-          callback("getConnecntion error at login: " + err, null);
+          callback( "getConnecntion error at login: " + err, null);
         }
 				else callback(null, connection);
 			});
@@ -45,13 +31,13 @@ router.get('/populity', function(req, res){
             msg : "501 user authorization error"
           });
           connection.release();
-          callback("JWT decoded err : "+ err, null);
+          callback(  "JWT decoded err : "+ err, null);
         }
         else callback(null, decoded.user_email, connection);
       });
     },
     function(userEmail, connection, callback){
-      let getRecipePhotoQuery = 'select * from my_recipe '+
+      let getRecipePhotoQuery = 'select myrecipe_id, myrecipe_image_url from my_recipe '+
       'order by myrecipe_count '+
       'limit 6';
       let data_list = [];
@@ -60,7 +46,8 @@ router.get('/populity', function(req, res){
           res.status(501).send({
             msg : "501 get recipe photo error"
           });
-          callback("getRecipePhotoQuery err : "+ err, null);
+          connection.release();
+          callback( "getRecipePhotoQuery err : "+ err, null);
         }
         else{
           for(let i = 0 ; i < myRecipeData.length ; i++){
@@ -68,7 +55,7 @@ router.get('/populity', function(req, res){
             data = {
               id : myRecipeData[i].myrecipe_id,
               imageUrl : myRecipeData[i].myrecipe_image_url,
-              title : myRecipeData[i].myrecipe_title,
+              title : null,
               checkSaveList : false
             };
             data_list.push(data);
@@ -85,7 +72,8 @@ router.get('/populity', function(req, res){
           res.status(501).send({
             msg : "501 access save list data error"
           });
-          callback("getSavelistQuery err : "+ err, null);
+          connection.release();
+          callback( "getSavelistQuery err : "+ err, null);
         }
         else{
           callback(null, saveData, data, userEmail, connection);
@@ -99,7 +87,6 @@ router.get('/populity', function(req, res){
           return count < data.length;
         },
         function(loop){
-          console.log(count);
           for(let i = 0 ; i < saveData.length; i++){
             if(data[count].id == saveData[i].my_savelist_origin_id){
               data[count].checkSaveList = true;
@@ -123,8 +110,14 @@ router.get('/populity', function(req, res){
     }
   ];
   async.waterfall(task_array, function(err, result) {
-    if (err) console.log(err);
-    else console.log(result);
+    if (err){
+      err = moment().format('MM/DDahh:mm:ss//') + err;
+      console.log(err);
+    }
+    else{
+      result = moment().format('MM/DDahh:mm:ss//') + result;
+      console.log(result);
+    }
   });
 });
 
@@ -137,7 +130,7 @@ router.get('/newest', function(req, res){
           res.status(500).send({
             msg : "500 Connection error"
           });
-          callback("getConnecntion error at login: " + err, null);
+          callback( "getConnecntion error at login: " + err, null);
         }
 				else callback(null, connection);
 			});
@@ -150,13 +143,14 @@ router.get('/newest', function(req, res){
           res.status(501).send({
             msg : "501 user authorization error"
           });
-          callback("JWT decoded err : "+ err, null);
+          connection.release();
+          callback( "JWT decoded err : "+ err, null);
         }
         else callback(null, decoded.user_email, connection);
       });
     },
     function(userEmail, connection, callback){
-      let getRecipePhotoQuery = 'select * from my_recipe '+
+      let getRecipePhotoQuery = 'select myrecipe_id, myrecipe_image_url from my_recipe '+
       'order by myrecipe_post_time '+
       'limit 6';
       let data_list = [];
@@ -165,7 +159,8 @@ router.get('/newest', function(req, res){
           res.status(501).send({
             msg : "501 get recipe photo error"
           });
-          callback("getRecipePhotoQuery err : "+ err, null);
+          connection.release();
+          callback( "getRecipePhotoQuery err : "+ err, null);
         }
         else{
           for(let i = 0 ; i < myRecipeData.length ; i++){
@@ -173,7 +168,7 @@ router.get('/newest', function(req, res){
             data = {
               id : myRecipeData[i].myrecipe_id,
               imageUrl : myRecipeData[i].myrecipe_image_url,
-              title : myRecipeData[i].myrecipe_title,
+              title : null,
               checkSaveList : false
             };
             data_list.push(data);
@@ -190,7 +185,8 @@ router.get('/newest', function(req, res){
           res.status(501).send({
             msg : "501 access save list data error"
           });
-          callback("getSavelistQuery err : "+ err, null);
+          connection.release();
+          callback( "getSavelistQuery err : "+ err, null);
         }
         else{
           callback(null, saveData, data, userEmail, connection);
@@ -204,7 +200,6 @@ router.get('/newest', function(req, res){
           return count < data.length;
         },
         function(loop){
-          console.log(count);
           for(let i = 0 ; i < saveData.length; i++){
             if(data[count].id == saveData[i].my_savelist_origin_id){
               data[count].checkSaveList = true;
@@ -228,8 +223,14 @@ router.get('/newest', function(req, res){
     }
   ];
   async.waterfall(task_array, function(err, result) {
-    if (err) console.log(err);
-    else console.log(result);
+    if (err){
+      err = moment().format('MM/DDahh:mm:ss//') + err;
+      console.log(err);
+    }
+    else{
+      result = moment().format('MM/DDahh:mm:ss//') + result;
+      console.log(result);
+    }
   });
 });
 

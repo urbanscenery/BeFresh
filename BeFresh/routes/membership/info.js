@@ -3,6 +3,7 @@ const express = require('express');
 const aws = require('aws-sdk');
 const async = require('async');
 const router = express.Router();
+const moment = require('moment');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 const mysql = require('mysql');
@@ -61,12 +62,16 @@ router.get('/', function(req, res){
       });
     }
   ];
-  async.waterfall(task_array, function(err, result){
-		if(err){
-			console.log(err);
-		}
-		else console.log(result);
-	});
+  async.waterfall(task_array, function(err, result) {
+    if (err){
+      err = moment().format('MM/DDahh:mm:ss//') + err;
+      console.log(err);
+    }
+    else{
+      result = moment().format('MM/DDahh:mm:ss//') + result;
+      console.log(result);
+    }
+  });
 });
 
 //멤버쉽 탈퇴
@@ -130,12 +135,16 @@ router.get('/out', function(req, res){
       });
     }
   ];
-  async.waterfall(task_array, function(err, result){
-		if(err){
-			console.log(err);
-		}
-		else console.log(result);
-	});
+  async.waterfall(task_array, function(err, result) {
+    if (err){
+      err = moment().format('MM/DDahh:mm:ss//') + err;
+      console.log(err);
+    }
+    else{
+      result = moment().format('MM/DDahh:mm:ss//') + result;
+      console.log(result);
+    }
+  });
 });
 
 

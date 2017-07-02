@@ -1,15 +1,14 @@
-//52.78.124.103:3412/login
+//52.78.124.103:3000/lists
 const express = require('express');
 const aws = require('aws-sdk');
 const async = require('async');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const moment = require('moment');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
-const mysql = require('mysql');
-const jwt = require('jsonwebtoken');
 
-//메인화면가기 위해서 유저멤버쉽 가입여부 정보 반환
+
 router.get('/', function(req, res){
   let task_array = [
     //1. connection 설정
@@ -39,26 +38,7 @@ router.get('/', function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      let getUserDataQuery = "select user_group from users where user_email = ?";
-      connection.query(getUserDataQuery, userEmail, function(err, userGroup){
-        if(err){
-          res.status(500).send({
-            msg : "500 Get user data error"
-          });
-          connection.release();
-          callback("get userGroup query err : "+err);
-        }
-        else{
-          res.status(200).send({
-            msg : "Success",
-            data : {
-              category : userGroup[0].user_group
-            }
-          });
-          connection.release();
-          callback(null, "succesful find user group");
-        }
-      });
+
     }
   ];
   async.waterfall(task_array, function(err, result) {
@@ -72,5 +52,7 @@ router.get('/', function(req, res){
     }
   });
 });
+
+
 
 module.exports = router;

@@ -5,9 +5,8 @@ const multer = require('multer');
 const async = require('async');
 const multerS3 = require('multer-s3');
 const router = express.Router();
-const fs = require('fs');
 const jwt = require('jsonwebtoken');
-//const config = JSON.parse(fs.readFileSync('./config/aws_config.json'));
+const moment = require('moment');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 const s3 = new aws.S3();
@@ -138,11 +137,15 @@ router.get('/', function(req, res){
       });
     },
     function(magazineData, restaurantData, myRecipeData, userEmail, connection, callback){
+      let getSaveQuery = 'select s.my_savelist_id, r.myrecipe_title, r.myrecipe_image_url '+
+      'from my_savelist s inner join my_recipe r on s.my_savelist_origin_id = r.myrecipe_id and s.my_savelist_from = 1 and s.user_email = ?';
+    },
+    function(saveData,magazineData, restaurantData, myRecipeData, userEmail, connection, callback){
       var finalData = {
         RecipePhoto : myRecipeData,
         Restaurant : restaurantData,
         Magazine : magazineData,
-        SaveList : null
+        SaveList : saveData
       };
       res.status(200).send({
         msg : "Success",
@@ -153,8 +156,14 @@ router.get('/', function(req, res){
     }
   ];
   async.waterfall(task_array, function(err, result) {
-    if (err) console.log(err);
-    else console.log(result);
+    if (err){
+      err = moment().format('MM/DDahh:mm:ss//') + err;
+      console.log(err);
+    }
+    else{
+      result = moment().format('MM/DDahh:mm:ss//') + result;
+      console.log(result);
+    }
   });
 });
 

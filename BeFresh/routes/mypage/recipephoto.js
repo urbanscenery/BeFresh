@@ -1,27 +1,15 @@
 //52.78.124.103:3000/lists
 const express = require('express');
 const aws = require('aws-sdk');
-const multer = require('multer');
 const async = require('async');
-const multerS3 = require('multer-s3');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
-const s3 = new aws.S3();
-const upload = multer({
-    storage: multerS3({
-        s3: s3,
-        bucket: 'befreshcommunity',
-        acl: 'public-read',
-        key: function(req, file, cb) {
-            cb(null, Date.now() + '.' + file.originalname.split('.').pop());
-        }
-    })
-});
 
-router.post('/',upload.single('image'), function(req, res){
+
+router.get('/', function(req, res){
   let task_array = [
     //1. connection 설정
     function(callback){
@@ -30,7 +18,7 @@ router.post('/',upload.single('image'), function(req, res){
           res.status(500).send({
             msg : "500 Connection error"
           });
-          callback("getConnecntion error at login: " + err, null);
+          callback("getConnecntion error: " + err, null);
         }
 				else callback(null, connection);
 			});
@@ -50,33 +38,47 @@ router.post('/',upload.single('image'), function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      let registQuery = 'insert into my_recipe set ?';
-//      if((req.body.title == null)||(req.body.content == null)||(req.file == null))
-      let imageUrl = req.file.location; //이미지 url없이 등록불가능
-      let data = {
-        myrecipe_title : req.body.title,
-        myrecipe_text : req.body.content,
-        myrecipe_image_url : imageUrl,
-        myrecipe_count : 0,
-        user_email : userEmail,
-        myrecipe_post_time : moment().format('MMMM Do YYYY, h:mm:ss a')
-      };
-      connection.query(registQuery, data, function(err){
+      let getSaveQuery = 'select s.my_savelist_id, r.recipe_id, r.recipe_title, r.recipe_subtitle, r.recipe_image, r.recipe_cookingTime, r.recipe_tag '+
+      'from my_savelist s inner join recipes r '+
+      'on s.my_savelist_origin_id = r.recipe_id and s.my_savelist_from = 1 and s.user_email = ? '+
+      'order by s.my_savelist_id';
+      connection.query(getSaveQuery, userEmail, function(err, data){
         if(err){
           res.status(501).send({
-            msg : "Regist content err"
+            msg : "501 get saved recipe data error"
           });
           connection.release();
-          callback("Regist content err : "+ err, null);
+          callback("getSaveQuery err : "+ err, null);
         }
         else{
-          res.status(201).send({
-            msg : "Success"
-          });
-          connection.release();
-          callback(null, "Successful writing my recipe");
+          let data_list = [];
+          for(let i = 0; i < data.length; i++){
+            let jsonData = JSON.parse(data[i].recipe_image);
+            let lastData = {
+              id : data[i].recipe_id,
+              image_url : jsonData.image[0].url,
+              title : data[i].recipe_title,
+              subtitle : data[i].recipe_subtitle,
+              difficulty : data[i].recipe_difficulty,
+              cookingTime : data[i].recipe_cookingTime,
+              hashtag : data[0].recipe_tag,
+              checkSaveList : true
+            };
+            data_list.push(lastData);
+          }
+          callback(null, data_list, connection);
         }
       });
+    },
+    function(saveData, connection, callback){
+      res.status(200).send({
+        msg : "Success",
+        data : {
+          savedRecipe :saveData
+        }
+      });
+      connection.release();
+      callback(null, "Successful find saved recipe");
     }
   ];
   async.waterfall(task_array, function(err, result) {
@@ -90,6 +92,7 @@ router.post('/',upload.single('image'), function(req, res){
     }
   });
 });
+
 
 
 

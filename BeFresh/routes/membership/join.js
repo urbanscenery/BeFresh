@@ -52,12 +52,16 @@ router.post('/', function(req, res){
       });
     }
   ];
-  async.waterfall(task_array, function(err, result){
-		if(err){
-			console.log(err);
-		}
-		else console.log(result);
-	});
+  async.waterfall(task_array, function(err, result) {
+    if (err){
+      err = moment().format('MM/DDahh:mm:ss//') + err;
+      console.log(err);
+    }
+    else{
+      result = moment().format('MM/DDahh:mm:ss//') + result;
+      console.log(result);
+    }
+  });
 });
 
 //멤버쉽 가입정보 입력후 확인눌렀을때
@@ -144,12 +148,16 @@ router.post('/info', function(req, res){
       });
     }
   ];
-  async.waterfall(task_array, function(err, result){
-		if(err){
-			console.log(err);
-		}
-		else console.log(result);
-	});
+  async.waterfall(task_array, function(err, result) {
+    if (err){
+      err = moment().format('MM/DDahh:mm:ss//') + err;
+      console.log(err);
+    }
+    else{
+      result = moment().format('MM/DDahh:mm:ss//') + result;
+      console.log(result);
+    }
+  });
 });
 
 

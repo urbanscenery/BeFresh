@@ -8,6 +8,7 @@ const pool = require('../../config/db_pool');
 const mysql = require('mysql');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const moment = require('moment');
 const saltRounds = 10;
 
 router.post('/', function(req, res){
@@ -80,12 +81,16 @@ router.post('/', function(req, res){
 			callback(null, "successful login");
     }
 	];
-	async.waterfall(task_array, function(err, result){
-		if(err){
-			console.log(err);
-		}
-		else console.log(result);
-	});
+	async.waterfall(task_array, function(err, result) {
+    if (err){
+      err = moment().format('MM/DDahh:mm:ss//') + err;
+      console.log(err);
+    }
+    else{
+      result = moment().format('MM/DDahh:mm:ss//') + result;
+      console.log(result);
+    }
+  });
 });
 
 module.exports = router;
