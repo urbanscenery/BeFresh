@@ -37,7 +37,7 @@ router.get('/:searching', function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image ,recipe_subtitle, recipe_difficulty, recipe_cookingTime '+
+      let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image ,recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag '+
       'from recipes '+
       'where recipe_title like ? or recipe_subtitle like ? or recipe_description like ? or recipe_method like ? or recipe_tag like ? or recipe_material like ?';
       let data_list = [];
@@ -64,6 +64,7 @@ router.get('/:searching', function(req, res){
               subtitle : searched[i].recipe_subtitle,
               difficulty : searched[i].recipe_difficulty,
               cookingTime : searched[i].recipe_cookingTime,
+              hashtag : searched[i].recipe_tag,
               checkSaveList : false
             };
             data_list.push(searchedData);

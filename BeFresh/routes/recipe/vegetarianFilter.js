@@ -40,11 +40,11 @@ router.post('/time', function(req, res){
     function(userEmail, connection, callback){
       let getRecipeQuery;
       if(req.body.overthirty == 0){
-        getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime from recipes '+
+        getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag from recipes '+
         'where recipe_cookingTime < 30 and recipe_category = ?';
       }
       else{
-        getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime from recipes '+
+        getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag from recipes '+
         'where recipe_cookingTime >= 30 and recipe_category = ?';
       }
 
@@ -67,6 +67,7 @@ router.post('/time', function(req, res){
               subtitle : fromTime[i].recipe_subtitle,
               difficulty : fromTime[i].recipe_difficulty,
               cookingTime : fromTime[i].recipe_cookingTime,
+              hashtag : fromTime[i].recipe_tag,
               checkSaveList : false
             };
             data_list.push(timeData);
@@ -121,7 +122,7 @@ router.post('/material', function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      let queryString = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime from recipes '+
+      let queryString = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag from recipes '+
       'where recipe_category = ? ';
       console.log(req.body.gluten ==1);
       if(req.body.gluten == 1){
@@ -165,6 +166,7 @@ router.post('/material', function(req, res){
               subtitle : fromMaterial[i].recipe_subtitle,
               difficulty : fromMaterial[i].recipe_difficulty,
               cookingTime : fromMaterial[i].recipe_cookingTime,
+              hashtag : fromMaterial[i].recipe_tag,
               checkSaveList : false
             };
             data_list.push(timeData);

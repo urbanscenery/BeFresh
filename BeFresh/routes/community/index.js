@@ -8,6 +8,7 @@ var restaurant = require('./restaurant');
 var restaurantContent = require('./restaurantContent');
 var magazine = require('./magazine');
 var magazineContent = require('./magazineContent');
+var savelist = require('./savelist');
 
 router.use('/main', main);
 router.use('/recipephoto', recipephoto);
@@ -17,6 +18,7 @@ router.use('/restaurant', restaurant);
 router.use('/restaurant/content', restaurantContent);
 router.use('/magazine', magazine);
 router.use('/magazine/content', magazineContent);
+router.use('/savelist', savelist);
 
 
 module.exports = router;
