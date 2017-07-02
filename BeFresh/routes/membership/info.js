@@ -84,6 +84,7 @@ router.get('/out', function(req, res){
           res.status(500).send({
             msg : "500 Connection error"
           });
+          connection.release();
           callback("getConnecntion error at login: " + err, null);
         }
 				else callback(null, connection);
@@ -97,6 +98,7 @@ router.get('/out', function(req, res){
           res.status(501).send({
             msg : "501 user authorization error"
           });
+          connection.release();
           callback("JWT decoded err : "+ err, null);
         }
         else callback(null, decoded.user_email, connection);
@@ -109,6 +111,7 @@ router.get('/out', function(req, res){
           res.status(500).send({
             msg : "500 membership out error"
           });
+          connection.release();
           callback("Delete membership query err : " + err, null);
         }
         else callback(null, userEmail, connection);
@@ -123,6 +126,7 @@ router.get('/out', function(req, res){
           res.status(500).send({
             msg : "500 membership out error"
           });
+          connection.release();
           callback("Update user group query err : " + err, null);
         }
         else{

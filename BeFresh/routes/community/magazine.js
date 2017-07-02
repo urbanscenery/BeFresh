@@ -38,7 +38,7 @@ router.get('/', function(req, res){
     },
     function(userEmail, connection, callback){
       let getMagazineQuery = 'select * from magazine '+
-      'order by magazine_post_time '+
+      'order by magazine_id desc '+
       'limit 6';
       let data_list = [];
       connection.query(getMagazineQuery, function(err,magazineData){
@@ -46,6 +46,7 @@ router.get('/', function(req, res){
           res.status(501).send({
             msg : "501 get magazine error"
           });
+          connection.release();
           callback("getMagazineQuery err : "+ err, null);
         }
         else{
@@ -55,7 +56,6 @@ router.get('/', function(req, res){
               id : magazineData[i].magazine_id,
               imageUrl : magazineData[i].magazine_image_url,
               title : magazineData[i].magazine_title,
-              content : magazineData[i].magazine_text,
               checkSaveList : false
             };
             data_list.push(data);
@@ -72,6 +72,7 @@ router.get('/', function(req, res){
           res.status(501).send({
             msg : "501 access save list data error"
           });
+          connection.release();
           callback("getSavelistQuery err : "+ err, null);
         }
         else{
@@ -86,7 +87,6 @@ router.get('/', function(req, res){
           return count < data.length;
         },
         function(loop){
-          console.log(count);
           for(let i = 0 ; i < saveData.length; i++){
             if(data[count].id == saveData[i].my_savelist_origin_id){
               data[count].checkSaveList = true;

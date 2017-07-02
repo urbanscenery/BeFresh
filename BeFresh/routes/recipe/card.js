@@ -29,6 +29,7 @@ router.get('/:id', function(req, res){
           res.status(501).send({
             msg : "501 get Recipe method error"
           });
+          connection.release();
           callback("getCardQuery err : "+ err, null);
         }
         else{

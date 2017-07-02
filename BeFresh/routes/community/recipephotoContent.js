@@ -43,6 +43,7 @@ router.get('/:id', function(req,res){
           res.status(501).send({
             msg : "501 get recipe photo content error"
           });
+          connection.release();
           callback("getDataQuery err : "+ err, null);
         }
         else{
@@ -70,6 +71,7 @@ router.get('/:id', function(req,res){
           res.status(501).send({
             msg : "501 access save list data error"
           });
+          connection.release();
           callback("getSavelistQuery err : "+ err, null);
         }
         else{
@@ -94,6 +96,7 @@ router.get('/:id', function(req,res){
           res.status(501).send({
             msg : "501 get recipe photo comment error"
           });
+          connection.release();
           callback("getCommentQuery err : "+ err, null);
         }
         else{
@@ -156,6 +159,7 @@ router.post('/comment', function(req, res){
           res.status(501).send({
             msg : "501 user authorization error"
           });
+          connection.release();
           callback("JWT decoded err : "+ err, null);
         }
         else callback(null, decoded.user_email, connection);

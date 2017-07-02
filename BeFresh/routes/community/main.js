@@ -50,8 +50,8 @@ router.get('/', function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      let getRecipePhotoQuery = 'select * from my_recipe '+
-      'order by myrecipe_post_time '+
+      let getRecipePhotoQuery = 'select myrecipe_id, myrecipe_image_url from my_recipe '+
+      'order by myrecipe_post_time desc '+
       'limit 6';
       let data_list = [];
       connection.query(getRecipePhotoQuery, function(err,myRecipeData){
@@ -59,6 +59,7 @@ router.get('/', function(req, res){
           res.status(501).send({
             msg : "501 get recipe photo error"
           });
+          connection.release();
           callback("getRecipePhotoQuery err : "+ err, null);
         }
         else{
@@ -68,8 +69,6 @@ router.get('/', function(req, res){
               id : myRecipeData[i].myrecipe_id,
               imageUrl : myRecipeData[i].myrecipe_image_url,
               title : null,
-              etcInformation : null,
-              checkSaveList : false,
               from : 2
             };
             data_list.push(data);
@@ -79,8 +78,8 @@ router.get('/', function(req, res){
       });
     },
     function(myRecipeData, userEmail, connection, callback){
-      let getRestaurantQuery = 'select * from restaurant '+
-      'order by restaurant_post_time '+
+      let getRestaurantQuery = 'select restaurant_id, restaurant_image_url from restaurant '+
+      'order by restaurant_id desc '+
       'limit 6';
       let data_list = [];
       connection.query(getRestaurantQuery, function(err, restaurantData){
@@ -96,9 +95,7 @@ router.get('/', function(req, res){
             data = {
               id : restaurantData[i].restaurant_id,
               imageUrl : restaurantData[i].restaurant_image_url,
-              title : restaurantData[i].restaurant_title,
-              etcInformation : restaurantData[i].restaurant_location,
-              checkSaveList : false,
+              title : null,
               from : 3
             };
             data_list.push(data);
@@ -109,7 +106,7 @@ router.get('/', function(req, res){
     },
     function(restaurantData, myRecipeData, userEmail, connection, callback){
       let getMagazineQuery = 'select * from magazine '+
-      'order by magazine_post_time '+
+      'order by magazine_id desc '+
       'limit 6';
       let data_list = [];
       connection.query(getMagazineQuery, function(err, magazineData){
@@ -126,8 +123,6 @@ router.get('/', function(req, res){
               id : magazineData[i].magazine_id,
               imageUrl : magazineData[i].magazine_image_url,
               title : magazineData[i].magazine_title,
-              etcInformation : null,
-              checkSaveList : false,
               from : 4
             };
             data_list.push(data);

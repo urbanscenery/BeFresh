@@ -31,6 +31,7 @@ router.get('/:id/:from', function(req, res){
           res.status(501).send({
             msg : "501 user authorization error"
           });
+          connection.release();
           callback("JWT decoded err : "+ err, null);
         }
         else callback(null, decoded.user_email, connection);
@@ -44,6 +45,7 @@ router.get('/:id/:from', function(req, res){
           res.status(501).send({
             msg : "501 get save list data error"
           });
+          connection.release();
           callback("getSavelistQuery err : "+ err, null);
         }
         else{

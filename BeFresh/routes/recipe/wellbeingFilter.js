@@ -31,6 +31,7 @@ router.post('/time', function(req, res){
           res.status(501).send({
             msg : "501 user authorization error"
           });
+          connection.release();
           callback("JWT decoded err : "+ err, null);
         }
         else callback(null, decoded.user_email, connection);
@@ -38,7 +39,7 @@ router.post('/time', function(req, res){
     },
     function(userEmail, connection, callback){
       let getRecipeQuery;
-      if(req.body.overthirty === 0){
+      if(req.body.overthirty == 0){
         getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime from recipes '+
         'where recipe_cookingTime < 30 and recipe_category = ?';
       }
@@ -53,6 +54,7 @@ router.post('/time', function(req, res){
           res.status(501).send({
             msg : "501 get wellbeing recipe data error"
           });
+          connection.release();
           callback("getRecipeQuery err : "+ err, null);
         }
         else{
@@ -118,6 +120,7 @@ router.post('/material', function(req, res){
           res.status(501).send({
             msg : "501 user authorization error"
           });
+          connection.release();
           callback("JWT decoded err : "+ err, null);
         }
         else callback(null, decoded.user_email, connection);
@@ -155,6 +158,7 @@ router.post('/material', function(req, res){
           res.status(501).send({
             msg : "501 get wellbeing recipe data error"
           });
+          connection.release();
           callback("getRecipeQuery err : "+ err, null);
         }
         else{

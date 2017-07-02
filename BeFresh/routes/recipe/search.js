@@ -51,6 +51,7 @@ router.get('/:searching', function(req, res){
           res.status(501).send({
             msg : "501 get searching recipe data error"
           });
+          connection.release();
           callback("getRecipeQuery err : "+ err, null);
         }
         else{

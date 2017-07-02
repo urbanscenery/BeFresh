@@ -39,7 +39,7 @@ router.get('/wellbeing', function(req, res){
     },
     function(userEmail, connection, callback){
       let currentTime = moment().format('YYYY-MM-DD');
-      let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime recipe_tag from recipes '+
+      let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag from recipes '+
       'where recipe_post_time = week(?) and recipe_category = ?';
       connection.query(getRecipeQuery, [currentTime, 'W'], function(err, currentWeek){
         if(err){
@@ -62,6 +62,7 @@ router.get('/wellbeing', function(req, res){
               title : currentWeek[0].recipe_title,
               subtitle : currentWeek[0].recipe_subtitle,
               difficulty : currentWeek[0].recipe_difficulty,
+              test : "test",
               cookingTime : currentWeek[0].recipe_cookingTime,
               hashtag : currentWeek[0].recipe_tag,
               checkSaveList : false
@@ -81,6 +82,7 @@ router.get('/wellbeing', function(req, res){
           res.status(501).send({
             msg : "501 get wellbeing recipe data error"
           });
+          connection.release();
           callback("getRecipeQuery err : "+ err, null);
         }
         else{
@@ -198,6 +200,7 @@ router.get('/vegetarian', function(req, res){
           res.status(501).send({
             msg : "501 get vegetarian recipe data error"
           });
+          connection.release();
           callback("getRecipeQuery err : "+ err, null);
         }
         else{

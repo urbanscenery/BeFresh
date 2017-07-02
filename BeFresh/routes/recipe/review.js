@@ -30,6 +30,7 @@ router.get('/:id', function(req, res){
           res.status(501).send({
             msg : "501 get Recipe error"
           });
+          connection.release();
           callback("getRecipeQuery err : "+ err, null);
         }
         else{
@@ -90,6 +91,7 @@ router.post('/registration', function(req, res){
           res.status(501).send({
             msg : "501 user authorization error"
           });
+          connection.release();
           callback("JWT decoded err : "+ err, null);
         }
         else callback(null, decoded.user_email, connection);

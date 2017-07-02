@@ -43,6 +43,7 @@ router.get('/:id', function(req,res){
           res.status(501).send({
             msg : "501 get restaurant recommand content error"
           });
+          connection.release();
           callback("getDataQuery err : "+ err, null);
         }
         else{
@@ -52,14 +53,15 @@ router.get('/:id', function(req,res){
             id : contentData[0].restaurant_id,
             imageUrl : contentData[0].restaurant_image_url,
             title : contentData[0].restaurant_title,
-            simplelocation : contentData[0].restaurant_location,
+            simplelocation : contentData[0].restaurant_location_image_url,
             content : contentData[0].restaurant_content,
             open : contentData[0].restaurant_open,
             breaking : contentData[0].restaurant_breakingtime,
             lastorder : contentData[0].restaurant_lastorder,
             price : contentData[0].restaurant_price,
             detaillocation : contentData[0].restaurant_location_detail,
-            locationImage : contentData[0].restaurant_location_image_url,
+            locationLatitude : contentData[0].restaurant_location_x,
+            locationLongtitude : contentData[0].restaurant_location_y,
             checkSaveList : false
           };
           callback(null, data, userEmail, connection);
@@ -74,6 +76,7 @@ router.get('/:id', function(req,res){
           res.status(501).send({
             msg : "501 access save list data error"
           });
+          connection.release();
           callback("getSavelistQuery err : "+ err, null);
         }
         else{

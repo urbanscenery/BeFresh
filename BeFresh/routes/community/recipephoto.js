@@ -37,8 +37,8 @@ router.get('/populity', function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      let getRecipePhotoQuery = 'select myrecipe_id, myrecipe_image_url from my_recipe '+
-      'order by myrecipe_count '+
+      let getRecipePhotoQuery = 'select myrecipe_id, myrecipe_image_url, myrecipe_title from my_recipe '+
+      'order by myrecipe_count desc '+
       'limit 6';
       let data_list = [];
       connection.query(getRecipePhotoQuery, function(err,myRecipeData){
@@ -55,7 +55,7 @@ router.get('/populity', function(req, res){
             data = {
               id : myRecipeData[i].myrecipe_id,
               imageUrl : myRecipeData[i].myrecipe_image_url,
-              title : null,
+              title : myRecipeData[i].myrecipe_title,
               checkSaveList : false
             };
             data_list.push(data);
@@ -150,8 +150,8 @@ router.get('/newest', function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      let getRecipePhotoQuery = 'select myrecipe_id, myrecipe_image_url from my_recipe '+
-      'order by myrecipe_post_time '+
+      let getRecipePhotoQuery = 'select myrecipe_id, myrecipe_image_url, myrecipe_title from my_recipe '+
+      'order by myrecipe_post_time desc '+
       'limit 6';
       let data_list = [];
       connection.query(getRecipePhotoQuery, function(err,myRecipeData){
@@ -168,7 +168,7 @@ router.get('/newest', function(req, res){
             data = {
               id : myRecipeData[i].myrecipe_id,
               imageUrl : myRecipeData[i].myrecipe_image_url,
-              title : null,
+              title : myRecipeData[i].myrecipe_title,
               checkSaveList : false
             };
             data_list.push(data);

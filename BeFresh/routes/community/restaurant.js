@@ -38,7 +38,7 @@ router.get('/', function(req, res){
     },
     function(userEmail, connection, callback){
       let getRestaurantQuery = 'select * from restaurant '+
-      'order by restaurant_post_time '+
+      'order by restaurant_id desc '+
       'limit 6';
       let data_list = [];
       connection.query(getRestaurantQuery, function(err,restaurantData){
@@ -46,6 +46,7 @@ router.get('/', function(req, res){
           res.status(501).send({
             msg : "501 get restaurant recommend error"
           });
+          connection.release();
           callback("getRestaurantQuery err : "+ err, null);
         }
         else{
@@ -55,7 +56,8 @@ router.get('/', function(req, res){
               id : restaurantData[i].restaurant_id,
               imageUrl : restaurantData[i].restaurant_image_url,
               title : restaurantData[i].restaurant_title,
-              location : restaurantData[i].restaurant_location,
+              location : restaurantData[i].restaurant_location_image_url,
+              content : restaurantData[i].restaurant_content,
               checkSaveList : false
             };
             data_list.push(data);
@@ -72,6 +74,7 @@ router.get('/', function(req, res){
           res.status(501).send({
             msg : "501 access save list data error"
           });
+          connection.release();
           callback("getSavelistQuery err : "+ err, null);
         }
         else{

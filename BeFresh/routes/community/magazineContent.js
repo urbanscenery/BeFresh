@@ -43,6 +43,7 @@ router.get('/:id', function(req,res){
           res.status(501).send({
             msg : "501 get magazine content error"
           });
+          connection.release();
           callback("getDataQuery err : "+ err, null);
         }
         else{
@@ -50,9 +51,7 @@ router.get('/:id', function(req,res){
           if(userEmail == contentData[0].user_email) authUser = true;
           let data = {
             id : contentData[0].magazine_id,
-            imageUrl : contentData[0].magazine_image_url,
-            title : contentData[0].magazine_title,
-            content : contentData[0].magazine_text,
+            content : contentData[0].magazine_content_image_url,
             checkSaveList : false
           };
           callback(null, data, userEmail, connection);
@@ -67,6 +66,7 @@ router.get('/:id', function(req,res){
           res.status(501).send({
             msg : "501 access save list data error"
           });
+          connection.release();
           callback("getSavelistQuery err : "+ err, null);
         }
         else{

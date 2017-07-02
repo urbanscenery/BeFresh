@@ -43,6 +43,7 @@ router.get('/:id', function(req, res){
           res.status(501).send({
             msg : "501 get Recipe error"
           });
+          connection.release();
           callback("getRecipeQuery err : "+ err, null);
         }
         else{
@@ -76,6 +77,7 @@ router.get('/:id', function(req, res){
           res.status(501).send({
             msg : "501 get Recipe error"
           });
+          connection.release();
           callback("getRecipeQuery err : "+ err, null);
         }
         else{
