@@ -7,7 +7,7 @@ const multerS3 = require('multer-s3');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
-aws.config.loadFromPath('../config/aws_config.json');
+aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 const s3 = new aws.S3();
 const upload = multer({
