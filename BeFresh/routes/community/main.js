@@ -7,7 +7,7 @@ const multerS3 = require('multer-s3');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
-aws.config.loadFromPath('./config/aws_config.json');
+aws.config.loadFromPath('../config/aws_config.json');
 const pool = require('../../config/db_pool');
 const s3 = new aws.S3();
 const upload = multer({
@@ -132,8 +132,120 @@ router.get('/', function(req, res){
       });
     },
     function(magazineData, restaurantData, myRecipeData, userEmail, connection, callback){
-      let getSaveQuery = 'select s.my_savelist_id, r.myrecipe_title, r.myrecipe_image_url '+
-      'from my_savelist s inner join my_recipe r on s.my_savelist_origin_id = r.myrecipe_id and s.my_savelist_from = 1 and s.user_email = ?';
+      let getSaveRecipePhotoQuery = 'select save.my_savelist_id, origin.myrecipe_id, origin.myrecipe_image_url '+
+      'from my_savelist save inner join my_recipe origin '+
+      'on save.my_savelist_origin_id = origin.myrecipe_id and save.my_savelist_from = 2 and save.user_email = ? '+
+      'order by save.my_savelist_id desc '+
+      'limit 6';
+      connection.query(getSaveRecipePhotoQuery, userEmail, function(err, saveRecipePhoto){
+        if(err){
+          res.status(501).send({
+            msg : "501 get save list data error"
+          });
+          connection.release();
+          callback("getSavelistQuery err : "+ err, null);
+        }
+        else{
+          let data_list = [];
+          for(let i = 0; i< saveRecipePhoto.length; i++){
+            let data;
+            data = {
+              id : saveRecipePhoto[i].myrecipe_id,
+              imageUrl : saveRecipePhoto[i].myrecipe_image_url,
+              title : null,
+              from : 2,
+              checkSaveList : true,
+              forSort : saveRecipePhoto[i].my_savelist_id
+            };
+            data_list.push(data);
+          }
+          callback(null, data_list, magazineData, restaurantData, myRecipeData, userEmail, connection);
+        }
+      });
+    },
+    function(savelist, magazineData, restaurantData, myRecipeData, userEmail, connection, callback){
+      let getSaveRestaurantQuery = 'select save.my_savelist_id, origin.restaurant_id, origin.restaurant_image_url '+
+      'from my_savelist save inner join restaurant origin '+
+      'on save.my_savelist_origin_id = origin.restaurant_id and save.my_savelist_from = 3 and save.user_email = ? '+
+      'order by save.my_savelist_id desc '+
+      'limit 6';
+      connection.query(getSaveRestaurantQuery, userEmail, function(err, saveRestaurant){
+        if(err){
+          res.status(501).send({
+            msg : "501 get save list data error"
+          });
+          connection.release();
+          callback("getSavelistQuery err : "+ err, null);
+        }
+        else{
+          for(let i = 0; i< saveRestaurant.length; i++){
+            let data;
+            data = {
+              id : saveRestaurant[i].restaurant_id,
+              imageUrl : saveRestaurant[i].restaurant_image_url,
+              title : null,
+              from : 3,
+              checkSaveList : true,
+              forSort : saveRestaurant[i].my_savelist_id
+            };
+            savelist.push(data);
+          }
+          callback(null, savelist, magazineData, restaurantData, myRecipeData, userEmail, connection);
+        }
+      });
+    },
+    function(savelist, magazineData, restaurantData, myRecipeData, userEmail, connection, callback){
+      let getSaveRecipePhotoQuery = 'select save.my_savelist_id, origin.magazine_id, origin.magazine_title, origin.magazine_image_url '+
+      'from my_savelist save inner join magazine origin '+
+      'on save.my_savelist_origin_id = origin.magazine_id and save.my_savelist_from = 4 and save.user_email = ? '+
+      'order by save.my_savelist_id desc '+
+      'limit 6';
+      connection.query(getSaveRecipePhotoQuery, userEmail, function(err, saveMagazine){
+        if(err){
+          res.status(501).send({
+            msg : "501 get save list data error"
+          });
+          connection.release();
+          callback("getSavelistQuery err : "+ err, null);
+        }
+        else{
+          for(let i = 0; i< saveMagazine.length; i++){
+            let data;
+            data = {
+              id : saveMagazine[i].magazine_id,
+              imageUrl : saveMagazine[i].magazine_image_url,
+              title : saveMagazine[i].magazine_title,
+              from : 4,
+              checkSaveList : true,
+              forSort : saveMagazine[i].my_savelist_id
+            };
+            savelist.push(data);
+          }
+          callback(null, savelist, magazineData, restaurantData, myRecipeData, userEmail, connection);
+        }
+      });
+    },
+    function(savelist, magazineData, restaurantData, myRecipeData, userEmail, connection, callback){
+      if(savelist.length <7){
+        callback(null, savelist, magazineData, restaurantData, myRecipeData, userEmail, connection);
+      }
+      else{
+        let by = function(name) {
+          return function(o, p) {
+            let a, b;
+            a = o[name];
+            b = p[name];
+            return a < b ? 1 : -1;
+          };
+        };
+        savelist.sort(by('forSort'));
+
+        let finalSaved = [];
+        for(let i = 0 ; i < 6; i++){
+          finalSaved.push(savelist[i]);
+        }
+        callback(null, finalSaved, magazineData, restaurantData, myRecipeData, userEmail, connection);
+      }
     },
     function(saveData,magazineData, restaurantData, myRecipeData, userEmail, connection, callback){
       var finalData = {
