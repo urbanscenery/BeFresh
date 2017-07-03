@@ -40,16 +40,18 @@ router.post('/time', function(req, res){
     function(userEmail, connection, callback){
       let getRecipeQuery;
       if(req.body.overthirty == 0){
-        getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag from recipes '+
-        'where recipe_cookingTime < 30 and recipe_category = ?';
+        getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag, recipe_post_time from recipes '+
+        "where recipe_cookingTime < 30 and recipe_category = 'W' and recipe_post_time <= week(?) "+
+        'order by recipe_post_time desc';
       }
       else{
-        getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag from recipes '+
-        'where recipe_cookingTime >= 30 and recipe_category = ?';
+        getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag, recipe_post_time from recipes '+
+        "where recipe_cookingTime >= 30 and recipe_category = 'W' and recipe_post_time <= week(?) "+
+        'order by recipe_post_time desc';
       }
 
       let data_list = [];
-      connection.query(getRecipeQuery, 'W', function(err, fromTime){
+      connection.query(getRecipeQuery, moment().format('YYYY-MM-DD'), function(err, fromTime){
         if(err){
           res.status(501).send({
             msg : "501 get wellbeing recipe data error"
@@ -68,21 +70,77 @@ router.post('/time', function(req, res){
               difficulty : fromTime[i].recipe_difficulty,
               cookingTime : fromTime[i].recipe_cookingTime,
               hashtag : fromTime[i].recipe_tag,
+              postTime : fromTime[i].recipe_post_time,
               checkSaveList : false
             };
             data_list.push(timeData);
           }
-          callback(null, data_list, connection);
+          callback(null, data_list, userEmail, connection);
         }
       });
     },
-    function(timeData, connection, callback){
-      res.status(200).send({
-        msg : "Success",
-        data : {
-          fromTime : timeData
+
+
+
+    function(data, userEmail, connection, callback){
+      let getSavelistQuery = 'select my_savelist_origin_id from my_savelist '+
+      'where user_email = ? and my_savelist_from = 1';
+      connection.query(getSavelistQuery, userEmail, function(err, saveData){
+        if(err){
+          res.status(501).send({
+            msg : "501 access save list data error"
+          });
+          connection.release();
+          callback( "getSavelistQuery err : "+ err, null);
+        }
+        else{
+          callback(null, saveData, data, userEmail, connection);
         }
       });
+    },
+    function(saveData, data, userEmail, connection, callback){
+      let count = 0;
+      async.whilst(
+        function(){
+          return count < data.length;
+        },
+        function(loop){
+          for(let i = 0 ; i < saveData.length; i++){
+            if(data[count].id == saveData[i].my_savelist_origin_id){
+              data[count].checkSaveList = true;
+            }
+          }
+          count++;
+          loop(null);
+        },
+        function(err){
+          callback(null,data, connection);
+        }
+      );
+    },
+
+
+    function(timeData, connection, callback){
+      if(timeData[0].postTime == moment().week()){
+        let current = timeData[0];
+        timeData.shift();
+        res.status(200).send({
+          msg : "Success",
+          data : {
+            thisWeek : current,
+            pastWeek : timeData
+          }
+        });
+      }
+      else{
+        res.status(200).send({
+          msg : "Success",
+          data : {
+            thisWeek : null,
+            pastWeek : timeData
+          }
+        });
+      }
       connection.release();
       callback(null, "successful find wellbeing recipe from time");
     }
@@ -128,9 +186,8 @@ router.post('/material', function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      let queryString = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag from recipes '+
-      'where recipe_category = ? ';
-      console.log(req.body.gluten ==1);
+      let queryString = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag, recipe_post_time from recipes '+
+      "where recipe_post_time <= week(?) and recipe_category = 'W'";
       if(req.body.gluten == 1){
         queryString = queryString +' and recipe_gluten = 1';
       }
@@ -149,12 +206,12 @@ router.post('/material', function(req, res){
       if(req.body.meat == 1){
         queryString = queryString + ' and recipe_meat = 1';
       }
-      console.log(queryString);
+      queryString += ' order by recipe_post_time desc';
       callback(null, queryString, userEmail, connection);
     },
     function(getRecipeQuery ,userEmail, connection, callback){
       let data_list = [];
-      connection.query(getRecipeQuery, 'W', function(err, fromMaterial){
+      connection.query(getRecipeQuery, moment().format('YYYY-MM-DD'), function(err, fromMaterial){
         if(err){
           res.status(501).send({
             msg : "501 get wellbeing recipe data error"
@@ -173,21 +230,85 @@ router.post('/material', function(req, res){
               difficulty : fromMaterial[i].recipe_difficulty,
               cookingTime : fromMaterial[i].recipe_cookingTime,
               hashtag : fromMaterial[i].recipe_tag,
+              postTime : fromMaterial[i].recipe_post_time,
               checkSaveList : false
             };
             data_list.push(timeData);
           }
-          callback(null, data_list, connection);
+          callback(null, data_list, userEmail, connection);
         }
       });
     },
-    function(materialData, connection, callback){
-      res.status(200).send({
-        msg : "Success",
-        data : {
-          fromMaterial : materialData
+
+    function(data, userEmail, connection, callback){
+      let getSavelistQuery = 'select my_savelist_origin_id from my_savelist '+
+      'where user_email = ? and my_savelist_from = 1';
+      connection.query(getSavelistQuery, userEmail, function(err, saveData){
+        if(err){
+          res.status(501).send({
+            msg : "501 access save list data error"
+          });
+          connection.release();
+          callback( "getSavelistQuery err : "+ err, null);
+        }
+        else{
+          callback(null, saveData, data, userEmail, connection);
         }
       });
+    },
+    function(saveData, data, userEmail, connection, callback){
+      let count = 0;
+      async.whilst(
+        function(){
+          return count < data.length;
+        },
+        function(loop){
+          for(let i = 0 ; i < saveData.length; i++){
+            if(data[count].id == saveData[i].my_savelist_origin_id){
+              data[count].checkSaveList = true;
+            }
+          }
+          count++;
+          loop(null);
+        },
+        function(err){
+          callback(null,data, connection);
+        }
+      );
+    },
+
+    function(materialData, connection, callback){
+      if(materialData.length === 0){
+        res.status(200).send({
+          msg : "Success",
+          data : {
+            thisWeek : null,
+            pastWeek : []
+          }
+        });
+      }
+      else{
+        if(materialData[0].postTime == moment().week()){
+          let current = materialData[0];
+          materialData.shift();
+          res.status(200).send({
+            msg : "Success",
+            data : {
+              thisWeek : current,
+              pastWeek : materialData
+            }
+          });
+        }
+        else{
+          res.status(200).send({
+            msg : "Success",
+            data : {
+              thisWeek : null,
+              pastWeek : materialData
+            }
+          });
+        }
+      }
       connection.release();
       callback(null, "successful find wellbeing recipe from time");
     }

@@ -5,7 +5,7 @@ const async = require('async');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
-aws.config.loadFromPath('./config/aws_config.json');
+aws.config.loadFromPath('../config/aws_config.json');
 const pool = require('../../config/db_pool');
 
 router.get('/:id', function(req, res){
@@ -62,15 +62,37 @@ router.get('/:id', function(req, res){
             method : method,
             material_image : recipeData[0].recipe_material_image,
             material_list : material_list.material,
+            review_count : 0,
             checkSaveList : false
           };
           callback(null, recipe, userEmail, connection);
         }
       });
     },
+
+    function(data, userEmail, connection, callback){
+      let getSavelistQuery = 'select my_savelist_origin_id from my_savelist '+
+      'where user_email = ? and my_savelist_from = 1 and my_savelist_origin_id = ?';
+      connection.query(getSavelistQuery, [userEmail, data.id] ,function(err, saveData){
+        if(err){
+          res.status(501).send({
+            msg : "501 access save list data error"
+          });
+          connection.release();
+          callback( "getSavelistQuery err : "+ err, null);
+        }
+        else{
+          if(saveData.length ==1){
+            data.checkSaveList = true;
+          }
+          callback(null, data, userEmail, connection);
+        }
+      });
+    },
+
     function(recipeData, userEmail, connection, callback){
       let getReviewQuery = 'select * from reviews where recipe_id = ? '+
-      'order by review_post_time '+
+      'order by review_post_time desc '+
       'limit 2';
       connection.query(getReviewQuery, req.params.id, function(err, reviewData){
         if(err){
@@ -91,6 +113,22 @@ router.get('/:id', function(req, res){
             data_list.push(review);
           }
           callback(null,data_list ,recipeData, connection);
+        }
+      });
+    },
+    function(reviewData, recipeData, connection, callback){
+      let getReviewQuery = 'select review_id from reviews where recipe_id = ?';
+      connection.query(getReviewQuery, req.params.id, function(err, data){
+        if(err){
+          res.status(501).send({
+            msg : "501 get Recipe error"
+          });
+          connection.release();
+          callback("getRecipeQuery err : "+ err, null);
+        }
+        else{
+          recipeData.review_count = data.length;
+          callback(null, reviewData, recipeData, connection);
         }
       });
     },

@@ -5,7 +5,7 @@ const async = require('async');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
-aws.config.loadFromPath('./config/aws_config.json');
+aws.config.loadFromPath('../config/aws_config.json');
 const pool = require('../../config/db_pool');
 
 router.get('/:searching', function(req, res){
@@ -69,9 +69,46 @@ router.get('/:searching', function(req, res){
             };
             data_list.push(searchedData);
           }
-          callback(null, data_list, connection);
+          callback(null, data_list, userEmail, connection);
         }
       });
+    },
+
+    function(data, userEmail, connection, callback){
+      let getSavelistQuery = 'select my_savelist_origin_id from my_savelist '+
+      'where user_email = ? and my_savelist_from = 1';
+      connection.query(getSavelistQuery, userEmail, function(err, saveData){
+        if(err){
+          res.status(501).send({
+            msg : "501 access save list data error"
+          });
+          connection.release();
+          callback( "getSavelistQuery err : "+ err, null);
+        }
+        else{
+          callback(null, saveData, data, userEmail, connection);
+        }
+      });
+    },
+    function(saveData, data, userEmail, connection, callback){
+      let count = 0;
+      async.whilst(
+        function(){
+          return count < data.length;
+        },
+        function(loop){
+          for(let i = 0 ; i < saveData.length; i++){
+            if(data[count].id == saveData[i].my_savelist_origin_id){
+              data[count].checkSaveList = true;
+            }
+          }
+          count++;
+          loop(null);
+        },
+        function(err){
+          callback(null,data, connection);
+        }
+      );
     },
     function(searchedData, connection, callback){
       res.status(200).send({

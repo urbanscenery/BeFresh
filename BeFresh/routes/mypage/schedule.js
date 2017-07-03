@@ -8,9 +8,13 @@ const jwt = require('jsonwebtoken');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 
+var j = schedule.scheduleJob('0 * * * * *', function(){
+  console.log(moment().format('MMMM Do YYYY, h:mm:ss a'));
+});
+
 
 //#################################이거 고쳐야함 목요일에 되는걸로!!!
-const autoAddDeriveried = schedule.scheduleJob('0 0 0 ? * TUE *', function(){
+const autoAddDeriveried = schedule.scheduleJob('0 0 0 * * TUE *', function(){
   let currentTime = moment().format('YYYY-MM-DD');
   let task_array = [
     function(callback){
