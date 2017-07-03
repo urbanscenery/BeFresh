@@ -104,7 +104,7 @@ router.post('/registration', function(req, res){
         review_score : req.body.score,
         review_post_time : moment().format('MMMM Do YYYY, h:mm:ss a'),
         recipe_id : req.body.id,
-        user_email : req.body.userEmail
+        user_email : userEmail
       };
       connection.query(registReviewQuery, data, function(err){
         if(err){
@@ -113,6 +113,21 @@ router.post('/registration', function(req, res){
           });
           connection.release();
           callback("Regist review err : "+ err, null);
+        }
+        else{
+          callback(null, userEmail, connection);
+        }
+      });
+    },
+    function(userEmail, connection, callback){
+      let updateReviewCheckQuery = 'update delivery set delivery_check_review = 1 where delivery_recipe_id = ? and user_email = ?';
+      connection.query(updateReviewCheckQuery, [req.body.id, userEmail], function(err){
+        if(err){
+          res.status(501).send({
+            msg : "Update review check err"
+          });
+          connection.release();
+          callback("updateReviewCheckQuery err : "+ err, null);
         }
         else{
           res.status(201).send({

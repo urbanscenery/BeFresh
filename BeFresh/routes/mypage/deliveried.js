@@ -8,7 +8,6 @@ const moment = require('moment');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 
-
 router.get('/', function(req, res){
   let task_array = [
     //1. connection 설정
@@ -18,7 +17,7 @@ router.get('/', function(req, res){
           res.status(500).send({
             msg : "500 Connection error"
           });
-          callback("getConnecntion error: " + err, null);
+          callback("getConnecntion error at login: " + err, null);
         }
 				else callback(null, connection);
 			});
@@ -38,47 +37,48 @@ router.get('/', function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      let getSaveQuery = 'select s.my_savelist_id, r.recipe_id, r.recipe_title, r.recipe_subtitle, r.recipe_image, r.recipe_cookingTime, r.recipe_tag '+
-      'from my_savelist s inner join recipes r '+
-      'on s.my_savelist_origin_id = r.recipe_id and s.my_savelist_from = 1 and s.user_email = ? '+
-      'order by s.my_savelist_id';
-      connection.query(getSaveQuery, userEmail, function(err, data){
+
+      let getDeliveriedRecipeQuery = 'select d.delivery_date, d.delivery_check_review, r.recipe_id, r.recipe_title, r.recipe_image '+
+      'from delivery d join recipes r '+
+      'on d.delivery_recipe_id = r.recipe_id and d.user_email = ? '+
+      'order by d.delivery_date desc';
+      connection.query(getDeliveriedRecipeQuery,userEmail, function(err, data){
         if(err){
           res.status(501).send({
-            msg : "501 get saved recipe data error"
+            msg : "501 get deliveried recipe data error"
           });
           connection.release();
-          callback("getSaveQuery err : "+ err, null);
+          callback("getDeliveriedRecipeQuery err : "+ err, null);
         }
         else{
+          console.log(data);
           let data_list = [];
-          for(let i = 0; i < data.length; i++){
+          for(let i = 0; i<data.length; i++){
             let jsonData = JSON.parse(data[i].recipe_image);
-            let lastData = {
+            let week = data[i].delivery_date;
+            let deliveriedData = {
               id : data[i].recipe_id,
               image_url : jsonData.image[0].url,
               title : data[i].recipe_title,
-              subtitle : data[i].recipe_subtitle,
-              difficulty : data[i].recipe_difficulty,
-              cookingTime : data[i].recipe_cookingTime,
-              hashtag : data[0].recipe_tag,
-              checkSaveList : true
+              deliveried_date : moment(week, 'WW').day(6).format('YYYY.MM.DD'),
+              check_review : data[i].delivery_check_review
             };
-            data_list.push(lastData);
+            console.log(deliveriedData);
+            data_list.push(deliveriedData);
           }
           callback(null, data_list, connection);
         }
       });
     },
-    function(saveData, connection, callback){
+    function(deliveriedData, connection, callback){
       res.status(200).send({
         msg : "Success",
         data : {
-          savedRecipe :saveData
+          deliveriedRecipe : deliveriedData
         }
       });
       connection.release();
-      callback(null, "Successful find saved recipe");
+      callback(null, "Successful find deliveried recipe");
     }
   ];
   async.waterfall(task_array, function(err, result) {
@@ -92,8 +92,6 @@ router.get('/', function(req, res){
     }
   });
 });
-
-
 
 
 module.exports = router;
