@@ -102,7 +102,6 @@ router.post('/info', function(req, res){
       if(req.body.category == 1)  category = 'W';
       else if(req.body.category == 2) category = 'V';
       else if(req.body.category == 3) category = 'B';
-      console.log(category);
       connection.query(updateUserGroupQuery, [category, userEmail], function(err){
         if(err){
           res.status(500).send({

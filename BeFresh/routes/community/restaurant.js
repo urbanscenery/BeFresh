@@ -89,7 +89,6 @@ router.get('/', function(req, res){
           return count < data.length;
         },
         function(loop){
-          console.log(count);
           for(let i = 0 ; i < saveData.length; i++){
             if(data[count].id == saveData[i].my_savelist_origin_id){
               data[count].checkSaveList = true;

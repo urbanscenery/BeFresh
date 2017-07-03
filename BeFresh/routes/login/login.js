@@ -61,8 +61,6 @@ router.post('/', function(req, res){
     //4. email이 있고 password 일치시 로그인 성공후 jwt 토큰발행, connection 해제.
     function(userEmail, connection, callback){
 			const secret = req.app.get('jwt-secret');
-			console.log(secret);
-			console.log(userEmail);
       let option = {
         algorithm : 'HS256',
 			  expiresIn : 3600 * 24 * 10 // 토큰의 유효기간이 10일
@@ -77,7 +75,7 @@ router.post('/', function(req, res){
           token : token
         });
 			connection.release();
-			callback(null, "successful login");
+			callback(null, "##### Successful login : "+userEmail);
     }
 	];
 	async.waterfall(task_array, function(err, result) {

@@ -21,7 +21,6 @@ router.post('/', function(req, res) {
     },
     //2. 입력받은 email값이 data에 있는지 검사
     function(connection, callback) {
-      console.log(req.body.email);
       let checkEmailQuery = 'select * from users where users.user_email = ?';
       connection.query(checkEmailQuery, req.body.email, function(err, mail) {
         if (err) {res.status(401).send({
@@ -29,8 +28,8 @@ router.post('/', function(req, res) {
         });
           connetion.release();
           callback("1st query err : " + err, null);
-        } else{
-          console.log(mail);
+        }
+        else{
           callback(null, mail, connection);
         }
       });
