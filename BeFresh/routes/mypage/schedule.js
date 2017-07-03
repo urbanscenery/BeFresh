@@ -8,12 +8,9 @@ const jwt = require('jsonwebtoken');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 
-var j = schedule.scheduleJob('0 0 0 ? * THU *', function(){
-  console.log(moment().format('MMMM Do YYYY, h:mm:ss a'));
-});
 
 //#################################이거 고쳐야함 목요일에 되는걸로!!!
-const autoAddDeriveried = schedule.scheduleJob('0 0 23 ? * MON *', function(){
+const autoAddDeriveried = schedule.scheduleJob('0 0 0 ? * TUE *', function(){
   let currentTime = moment().format('YYYY-MM-DD');
   let task_array = [
     function(callback){
@@ -104,7 +101,6 @@ const autoAddDeriveried = schedule.scheduleJob('0 0 23 ? * MON *', function(){
     },
 
 
-
     function(vID, wID, connection, callback){
       let getMemberQuery = "select user_email from users "+
       "where user_group = 'V' and user_email not in "+
@@ -188,6 +184,39 @@ const autoAddDeriveried = schedule.scheduleJob('0 0 23 ? * MON *', function(){
       }
       else callback(null, connection);
     },
+
+
+    function(connection, callback){
+      let updatePointQuery = "update users set user_point = user_point+500 where user_group = 'W' and user_email not in (select user_email from refused where refused_date = week('"+currentTime +"'));";
+      connection.query(updatePointQuery, function(err){
+        if(err){
+          connection.release();
+          callback("updatePointQuery err :" + err, null);
+        }
+        else callback(null, connection);
+      });
+    },
+    function(connection, callback){
+      let updatePointQuery = "update users set user_point = user_point+500 where user_group = 'V' and user_email not in (select user_email from refused where refused_date = week('"+currentTime +"'));";
+      connection.query(updatePointQuery, function(err){
+        if(err){
+          connection.release();
+          callback("updatePointQuery err :" + err, null);
+        }
+        else callback(null, connection);
+      });
+    },
+    function(connection, callback){
+      let updatePointQuery = "update users set user_point = user_point+500 where user_group = 'B' and user_email not in (select user_email from refused where refused_date = week('"+currentTime +"'));";
+      connection.query(updatePointQuery, function(err){
+        if(err){
+          connection.release();
+          callback("updatePointQuery err :" + err, null);
+        }
+        else callback(null, connection);
+      });
+    },
+
     function(connection, callback){
       connection.release();
       callback(null, "OK");

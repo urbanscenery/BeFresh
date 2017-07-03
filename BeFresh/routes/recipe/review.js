@@ -120,6 +120,19 @@ router.post('/registration', function(req, res){
       });
     },
     function(userEmail, connection, callback){
+      let updatePointQuery = 'update users set user_point = user_point+500 where user_email = ?';
+      connection.query(updatePointQuery, userEmail, function(err){
+        if(err){
+          res.status(501).send({
+            msg : "Update point err"
+          });
+          connection.release();
+          callback("updatePointQuery err : "+ err, null);
+        }
+        else callback(null, userEmail, connection);
+      });
+    },
+    function(userEmail, connection, callback){
       let updateReviewCheckQuery = 'update delivery set delivery_check_review = 1 where delivery_recipe_id = ? and user_email = ?';
       connection.query(updateReviewCheckQuery, [req.body.id, userEmail], function(err){
         if(err){

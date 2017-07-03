@@ -72,6 +72,27 @@ router.get('/wellbeing', function(req, res){
         }
       });
     },
+
+    function(data, userEmail, connection, callback){
+      let getSavelistQuery = 'select my_savelist_origin_id from my_savelist '+
+      'where user_email = ? and my_savelist_from = 1 and my_savelist_origin_id = ?';
+      connection.query(getSavelistQuery, [userEmail, data.id] ,function(err, saveData){
+        if(err){
+          res.status(501).send({
+            msg : "501 access save list data error"
+          });
+          connection.release();
+          callback( "getSavelistQuery err : "+ err, null);
+        }
+        else{
+          if(saveData.length ==1){
+            data.checkSaveList = true;
+          }
+          callback(null, data, userEmail, connection);
+        }
+      });
+    },
+
     function(currentData, userEmail, connection, callback){
       let currentTime = moment().format('YYYY-MM-DD');
       let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag from recipes '+
@@ -100,10 +121,49 @@ router.get('/wellbeing', function(req, res){
             };
             data_list.push(lastData);
           }
-          callback(null, data_list, currentData, connection);
+          callback(null, data_list, currentData, userEmail, connection);
         }
       });
     },
+
+    function(data, currentData ,userEmail, connection, callback){
+      let getSavelistQuery = 'select my_savelist_origin_id from my_savelist '+
+      'where user_email = ? and my_savelist_from = 1';
+      connection.query(getSavelistQuery, userEmail, function(err, saveData){
+        if(err){
+          res.status(501).send({
+            msg : "501 access save list data error"
+          });
+          connection.release();
+          callback( "getSavelistQuery err : "+ err, null);
+        }
+        else{
+          callback(null, saveData, data, currentData ,userEmail, connection);
+        }
+      });
+    },
+    function(saveData, data, currentData ,userEmail, connection, callback){
+      let count = 0;
+      async.whilst(
+        function(){
+          return count < data.length;
+        },
+        function(loop){
+          for(let i = 0 ; i < saveData.length; i++){
+            if(data[count].id == saveData[i].my_savelist_origin_id){
+              data[count].checkSaveList = true;
+            }
+          }
+          count++;
+          loop(null);
+        },
+        function(err){
+          callback(null,data, currentData ,connection);
+        }
+      );
+    },
+
+
     function(lastData, currentData, connection, callback){
       res.status(200).send({
         msg : "Success",
@@ -190,6 +250,28 @@ router.get('/vegetarian', function(req, res){
         }
       });
     },
+
+    function(data, userEmail, connection, callback){
+      let getSavelistQuery = 'select my_savelist_origin_id from my_savelist '+
+      'where user_email = ? and my_savelist_from = 1 and my_savelist_origin_id = ?';
+      connection.query(getSavelistQuery, [userEmail, data.id] ,function(err, saveData){
+        if(err){
+          res.status(501).send({
+            msg : "501 access save list data error"
+          });
+          connection.release();
+          callback( "getSavelistQuery err : "+ err, null);
+        }
+        else{
+          if(saveData.length ==1){
+            data.checkSaveList = true;
+          }
+          callback(null, data, userEmail, connection);
+        }
+      });
+    },
+
+
     function(currentData, userEmail, connection, callback){
       let currentTime = moment().format('YYYY-MM-DD');
       let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag from recipes '+
@@ -218,10 +300,49 @@ router.get('/vegetarian', function(req, res){
             };
             data_list.push(lastData);
           }
-          callback(null, data_list, currentData, connection);
+          callback(null, data_list, currentData, userEmail ,connection);
         }
       });
     },
+
+    function(data, currentData ,userEmail, connection, callback){
+      let getSavelistQuery = 'select my_savelist_origin_id from my_savelist '+
+      'where user_email = ? and my_savelist_from = 1';
+      connection.query(getSavelistQuery, userEmail, function(err, saveData){
+        if(err){
+          res.status(501).send({
+            msg : "501 access save list data error"
+          });
+          connection.release();
+          callback( "getSavelistQuery err : "+ err, null);
+        }
+        else{
+          callback(null, saveData, data, currentData ,userEmail, connection);
+        }
+      });
+    },
+    function(saveData, data, currentData ,userEmail, connection, callback){
+      let count = 0;
+      async.whilst(
+        function(){
+          return count < data.length;
+        },
+        function(loop){
+          for(let i = 0 ; i < saveData.length; i++){
+            if(data[count].id == saveData[i].my_savelist_origin_id){
+              data[count].checkSaveList = true;
+            }
+          }
+          count++;
+          loop(null);
+        },
+        function(err){
+          callback(null,data, currentData ,connection);
+        }
+      );
+    },
+
+
     function(lastData, currentData, connection, callback){
       res.status(200).send({
         msg : "Success",
