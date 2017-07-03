@@ -70,7 +70,6 @@ router.post('/', function(req, res){
       let payload = {
         user_email : userEmail
       };
-			console.log("****************");
       let token = jwt.sign(payload, req.app.get('jwt-secret'), option);
       res.status(201).send(
         {

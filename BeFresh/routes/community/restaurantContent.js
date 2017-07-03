@@ -47,8 +47,6 @@ router.get('/:id', function(req,res){
           callback("getDataQuery err : "+ err, null);
         }
         else{
-          let authUser = false;
-          if(userEmail == contentData[0].user_email) authUser = true;
           let data = {
             id : contentData[0].restaurant_id,
             imageUrl : contentData[0].restaurant_image_url,

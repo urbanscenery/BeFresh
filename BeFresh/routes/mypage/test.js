@@ -8,12 +8,7 @@ const jwt = require('jsonwebtoken');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 
-var j = schedule.scheduleJob('0 0 0 ? * THU *', function(){
-  console.log(moment().format('MMMM Do YYYY, h:mm:ss a'));
-});
-
-//#################################이거 고쳐야함 목요일에 되는걸로!!!
-const autoAddDeriveried = schedule.scheduleJob('0 0 23 ? * MON *', function(){
+router.get('/', function(req, res){
   let currentTime = moment().format('YYYY-MM-DD');
   let task_array = [
     function(callback){
@@ -190,19 +185,20 @@ const autoAddDeriveried = schedule.scheduleJob('0 0 23 ? * MON *', function(){
     },
     function(connection, callback){
       connection.release();
+      res.status(200).send("OK");
       callback(null, "OK");
     }
   ];
   async.waterfall(task_array, function(err, result) {
     if (err){
       err = moment().format('MM/DDahh:mm:ss//') + err;
-      console.log("################# ADD Deliveried ERROR!!!#########################");
       console.log(err);
     }
     else{
       result = moment().format('MM/DDahh:mm:ss//') + result;
-      console.log("###################ADD Deliveried DATA #########################");
       console.log(result);
     }
   });
 });
+
+module.exports = router;

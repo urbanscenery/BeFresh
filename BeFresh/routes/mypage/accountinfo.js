@@ -71,7 +71,7 @@ router.get('/', function(req, res){
             callback("getMembershipInfoQuery err : "+ err, null);
           }
           else{
-            let address = membershipData[0].membership_address + membershipData[0].membership_subAddress;
+            let address = membershipData[0].membership_address +' ' +membershipData[0].membership_subAddress;
             let data = {
               phone : membershipData[0].membership_phone,
               address : address,
