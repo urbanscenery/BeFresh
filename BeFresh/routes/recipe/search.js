@@ -5,7 +5,7 @@ const async = require('async');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
-aws.config.loadFromPath('../config/aws_config.json');
+aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 
 router.get('/:searching', function(req, res){
