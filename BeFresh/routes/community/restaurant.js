@@ -38,8 +38,7 @@ router.get('/', function(req, res){
     },
     function(userEmail, connection, callback){
       let getRestaurantQuery = 'select * from restaurant '+
-      'order by restaurant_id desc '+
-      'limit 6';
+      'order by restaurant_id desc';
       let data_list = [];
       connection.query(getRestaurantQuery, function(err,restaurantData){
         if(err){

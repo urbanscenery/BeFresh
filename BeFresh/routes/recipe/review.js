@@ -102,7 +102,7 @@ router.post('/registration', function(req, res){
       let data = {
         review_content : req.body.content,
         review_score : req.body.score,
-        review_post_time : moment().format('MMMM Do YYYY, h:mm:ss a'),
+        review_post_time : moment().format('YYYY-MM-DD, h:mm:ss a'),
         recipe_id : req.body.id,
         user_email : userEmail
       };

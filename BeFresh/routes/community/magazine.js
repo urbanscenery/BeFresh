@@ -38,8 +38,7 @@ router.get('/', function(req, res){
     },
     function(userEmail, connection, callback){
       let getMagazineQuery = 'select * from magazine '+
-      'order by magazine_id desc '+
-      'limit 6';
+      'order by magazine_id desc';
       let data_list = [];
       connection.query(getMagazineQuery, function(err,magazineData){
         if(err){

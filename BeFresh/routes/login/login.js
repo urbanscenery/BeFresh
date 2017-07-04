@@ -22,7 +22,7 @@ router.post('/', function(req, res){
 		},
 		//2. 입력된 email을 DB에서 찾음
 		function(connection, callback){
-			let getMailPwdQuery = 'select user_email, user_pwd from users where users.user_email=?';
+			let getMailPwdQuery = 'select user_name, user_email, user_pwd from users where users.user_email=?';
 			connection.query(getMailPwdQuery, req.body.email, function(err,userdata){
 				if(err){
 					connection.release();
@@ -45,7 +45,7 @@ router.post('/', function(req, res){
 					if(err) callback("password compare error : "+ err,null);
 					else{
 						if(login){
-							callback(null, userdata[0].user_email, connection);
+							callback(null,userdata[0].user_name ,userdata[0].user_email, connection);
 						}
 						else{
 							connection.release();
@@ -59,7 +59,7 @@ router.post('/', function(req, res){
 			}
 		},
     //4. email이 있고 password 일치시 로그인 성공후 jwt 토큰발행, connection 해제.
-    function(userEmail, connection, callback){
+    function(userName, userEmail, connection, callback){
 			const secret = req.app.get('jwt-secret');
       let option = {
         algorithm : 'HS256',
@@ -72,6 +72,7 @@ router.post('/', function(req, res){
       res.status(201).send(
         {
 					msg : "Success",
+					name : userName,
           token : token
         });
 			connection.release();

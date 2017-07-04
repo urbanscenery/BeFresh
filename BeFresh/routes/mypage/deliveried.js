@@ -51,7 +51,6 @@ router.get('/', function(req, res){
           callback("getDeliveriedRecipeQuery err : "+ err, null);
         }
         else{
-          console.log(data);
           let data_list = [];
           for(let i = 0; i<data.length; i++){
             let jsonData = JSON.parse(data[i].recipe_image);
@@ -63,7 +62,6 @@ router.get('/', function(req, res){
               deliveried_date : moment(week, 'WW').day(6).format('YYYY.MM.DD'),
               check_review : data[i].delivery_check_review
             };
-            console.log(deliveriedData);
             data_list.push(deliveriedData);
           }
           callback(null, data_list, connection);

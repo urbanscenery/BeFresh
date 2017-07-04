@@ -11,7 +11,7 @@ const pool = require('../../config/db_pool');
 
 /*
 var j = schedule.scheduleJob('0 * * * * *', function(){
-  console.log(moment().format('MMMM Do YYYY, h:mm:ss a'));
+  console.log(moment().format('YYYY-MM-DD, h:mm:ss a'));
 });
 */
 

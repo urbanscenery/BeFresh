@@ -10,6 +10,38 @@ const moment = require('moment');
 const jwt = require('jsonwebtoken');
 
 
+function chkZipcode(str){
+  var zipcode = /^([0-9]{5,6})$/;
+  if(!zipcode.test(str)){
+    return false;
+  }
+  return true;
+}
+
+function chkAddress(str){
+  var address = /^((?:[가-힣]*\s*([0-9가-힣-/])){0,66})$/;
+  if(!address.test(str)){
+    return false;
+  }
+  return true;
+}
+
+function chkPhone(str){
+  var email = /^01([0-9]{1})-([0-9]{3,4})-([0-9]{4})$/;
+  if (!email.test(str)){
+    return false;
+  }
+  return true;
+}
+
+function chkName(str){
+  var name = /^([가-힣]{2,4})$/;
+  if (!name.test(str)){
+    return false;
+  }
+  return true;
+}
+
 //멤버쉽 가입첫창
 router.post('/', function(req, res){
   let task_array = [
@@ -68,6 +100,39 @@ router.post('/', function(req, res){
 //멤버쉽 가입정보 입력후 확인눌렀을때
 router.post('/info', function(req, res){
   let task_array = [
+    function(callback){
+      if(!chkName(req.body.name)){
+        res.status(401).send({
+          msg : "Useless Name"
+        });
+        callback("useless name");
+      }
+      else if(!chkAddress(req.body.address)){
+        res.status(401).send({
+          msg : "Useless Address"
+        });
+        callback("useless address");
+      }
+      else if(!chkAddress(req.body.subAddress)){
+        res.status(401).send({
+          msg : "Useless Sub Address"
+        });
+        callback("useless sub address");
+      }
+      else if(!chkZipcode(req.body.zipcode)){
+        res.status(401).send({
+          msg : "Useless Zipcode"
+        });
+        callback("useless zipcode");
+      }
+      else if(!chkPhone(req.body.phone)){
+        res.status(401).send({
+          msg : "Useless Phone number"
+        });
+        callback("useless phone");
+      }
+      else callback(null);
+    },
     //1. connection 설정
     function(callback){
 			pool.getConnection(function(err, connection){

@@ -38,8 +38,7 @@ router.get('/populity', function(req, res){
     },
     function(userEmail, connection, callback){
       let getRecipePhotoQuery = 'select myrecipe_id, myrecipe_image_url, myrecipe_title from my_recipe '+
-      'order by myrecipe_count desc '+
-      'limit 6';
+      'order by myrecipe_count desc';
       let data_list = [];
       connection.query(getRecipePhotoQuery, function(err,myRecipeData){
         if(err){
@@ -151,8 +150,7 @@ router.get('/newest', function(req, res){
     },
     function(userEmail, connection, callback){
       let getRecipePhotoQuery = 'select myrecipe_id, myrecipe_image_url, myrecipe_title from my_recipe '+
-      'order by myrecipe_post_time desc '+
-      'limit 6';
+      'order by myrecipe_post_time desc';
       let data_list = [];
       connection.query(getRecipePhotoQuery, function(err,myRecipeData){
         if(err){
