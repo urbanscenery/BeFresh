@@ -88,6 +88,9 @@ router.post('/', function(req, res) {
       if (mail.length === 0) {
         bcrypt.hash(req.body.pwd, saltRounds, function(err, hash) {
           if (err) {
+            res.status(501).send({
+              msg : "password hashing error"
+            });
             connection.release();
             callback("Password hashing error : " + err, null);
           } else callback(null, hash, connection);
@@ -105,6 +108,9 @@ router.post('/', function(req, res) {
       let query = 'insert into users values(?,?,?,?,?,?)';
       connection.query(query, [req.body.email,hash ,req.body.name, 'N', null, 0], function(err) {
         if (err) {
+          res.status(501).send({
+            msg : "insert user data error"
+          });
           connection.release();
           callback("insert error : " + err, null);
         } else {

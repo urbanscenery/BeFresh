@@ -25,6 +25,9 @@ router.post('/', function(req, res){
 			let getMailPwdQuery = 'select user_name, user_email, user_pwd from users where users.user_email=?';
 			connection.query(getMailPwdQuery, req.body.email, function(err,userdata){
 				if(err){
+					res.status(501).send({
+						msg : "find user data err"
+					});
 					connection.release();
 					callback("1st query err at login : "+err, null);
 				}
@@ -42,7 +45,12 @@ router.post('/', function(req, res){
 				}
 			else{
 				bcrypt.compare(req.body.pwd, userdata[0].user_pwd, function(err, login){
-					if(err) callback("password compare error : "+ err,null);
+					if(err){
+						res.status(501).send({
+							msg : "password encryption error"
+						})
+						callback("password compare error : "+ err,null);
+					}
 					else{
 						if(login){
 							callback(null,userdata[0].user_name ,userdata[0].user_email, connection);
