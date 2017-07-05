@@ -7,6 +7,17 @@ const jwt = require('jsonwebtoken');
 const moment = require('moment');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
+
+function chkPwd(str){
+  var pwd = /^.*(?=.{8,20})(?=.*[0-9])(?=.*[a-zA-Z]).*$/;
+  if (!pwd.test(str)) {
+    return false;
+  }
+  return true;
+}
 
 router.get('/', function(req, res){
   let task_array = [
@@ -110,6 +121,124 @@ router.get('/', function(req, res){
   });
 });
 
+
+router.put('/setpwd', function(req, res){
+  let task_array = [
+    //1. connection 설정
+    function(callback){
+			pool.getConnection(function(err, connection){
+				if(err){
+          res.status(500).send({
+            msg : "500 Connection error"
+          });
+          callback("getConnecntion error at login: " + err, null);
+        }
+				else callback(null, connection);
+			});
+		},
+    //2. header의 token 값으로 user_email 받아옴.
+    function(connection, callback){
+      let token = req.headers.token;
+      jwt.verify(token, req.app.get('jwt-secret'), function(err, decoded){
+        if(err){
+          res.status(501).send({
+            msg : "501 user authorization error"
+          });
+          connection.release();
+          callback("JWT decoded err : "+ err, null);
+        }
+        else callback(null, decoded.user_email, connection);
+      });
+    },
+    function(userEmail, connection ,callback){
+      let getPwdQuery = 'select user_pwd from users where user_email = ?';
+      connection.query(getPwdQuery, userEmail, function(err, userPwd){
+        if(err){
+          res.status(501).send({
+						msg : "find user data err"
+					});
+          connection.release();
+          callback("getPwdQuery err : "+err, null);
+        }
+        else{
+          bcrypt.compare(req.body.oldPwd, userPwd[0].user_pwd, function(err, correct){
+              if(err){
+    						res.status(501).send({
+    							msg : "password encryption error"
+    						})
+    						callback("password compare error : "+ err,null);
+    					}
+    					else{
+    						if(correct){
+    							callback(null,userEmail, connection);
+    						}
+    						else{
+    							connection.release();
+    							res.status(401).send({
+    								msg : "wrong old password"
+    							});
+    							callback("wrong old password", null);
+    						}
+    					}
+          });
+        }
+      });
+    },
+    function(userEmail, connection, callback){
+      if(!chkPwd(req.body.newPwd)){
+        res.status(400).send({
+          msg : "Useless new password"
+        });
+        connection.release();
+        callback("useless new password");
+      }
+      else{
+        bcrypt.hash(req.body.newPwd, saltRounds, function(err, hash) {
+          if (err) {
+            res.status(501).send({
+              msg : "password hashing error"
+            });
+            connection.release();
+            callback("Password hashing error : " + err, null);
+          }
+          else{
+            callback(null, hash, userEmail, connection);
+          }
+        });
+      }
+    },
+    function(hash, userEmail, connection, callback){
+      let updatePwdQuery = 'update users set user_pwd = ? where user_email = ?';
+      connection.query(updatePwdQuery, [hash, userEmail], function(err){
+        if(err){
+          res.status(501).send({
+            msg : "update new password error"
+          });
+          connection.release();
+          callback("updatePwdQuery err : " + err, null);
+        }
+        else{
+          res.status(200).send({
+            msg : "Success"
+          });
+          connection.release();
+          callback(null, "Successful change passsword");
+        }
+      });
+    }
+
+  ];
+  async.waterfall(task_array, function(err, result) {
+    if (err){
+      err = moment().format('MM/DDahh:mm:ss//') + err;
+      console.log(err);
+    }
+    else{
+      result = moment().format('MM/DDahh:mm:ss//') + result;
+      console.log(result);
+    }
+  });
+});
 
 
 

@@ -27,7 +27,7 @@ function chkEmail(str){
 }
 
 function chkName(str){
-  var name = /^.*(?=.{1,20})(?=.*[a-zA-Z]).*$/;
+  var name = /^.*(?=.{1,20})(?=.*[a-zA-Z가-힣0-9]).*$/;
   if( !name.test(str)){
     return false;
   }
@@ -46,21 +46,21 @@ router.post('/', function(req, res) {
     //2. 이메일, 비밀번호 유효성 검사.
     function(connection,callback){
       if(!chkPwd(req.body.pwd)){
-        res.status(401).send({
+        res.status(400).send({
           msg : "Useless Password"
         });
         connection.release();
         callback("useless password", null);
       }
       else if(!chkEmail(req.body.email)){
-        res.status(401).send({
+        res.status(400).send({
           msg : "Useless E-Mail"
         });
         connection.release();
         callback("useless email", null);
       }
       else if(!chkName(req.body.name)){
-        res.status(401).send({
+        res.status(400).send({
           msg : "Useless Name"
         });
         connection.release();
