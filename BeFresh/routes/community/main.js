@@ -1,25 +1,12 @@
 //52.78.124.103:3000/lists
 const express = require('express');
 const aws = require('aws-sdk');
-const multer = require('multer');
 const async = require('async');
-const multerS3 = require('multer-s3');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
-const s3 = new aws.S3();
-const upload = multer({
-    storage: multerS3({
-        s3: s3,
-        bucket: 'befreshcommunity',
-        acl: 'public-read',
-        key: function(req, file, cb) {
-            cb(null, Date.now() + '.' + file.originalname.split('.').pop());
-        }
-    })
-});
 
 router.get('/', function(req, res){
   let task_array = [
@@ -50,7 +37,8 @@ router.get('/', function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      let getRecipePhotoQuery = 'select myrecipe_id, myrecipe_image_url from my_recipe '+
+      console.log(userEmail);
+      let getRecipePhotoQuery = 'select myrecipe_id, myrecipe_image_url, myrecipe_image_w, myrecipe_image_h from my_recipe '+
       'order by myrecipe_post_time desc '+
       'limit 6';
       let data_list = [];
@@ -69,6 +57,8 @@ router.get('/', function(req, res){
               id : myRecipeData[i].myrecipe_id,
               imageUrl : myRecipeData[i].myrecipe_image_url,
               title : null,
+              width : myRecipeData[i].myrecipe_image_w,
+              height : myRecipeData[i].myrecipe_image_h,
               from : 2
             };
             data_list.push(data);
@@ -96,6 +86,8 @@ router.get('/', function(req, res){
               id : restaurantData[i].restaurant_id,
               imageUrl : restaurantData[i].restaurant_image_url,
               title : null,
+              width : null,
+              height : null,
               from : 3
             };
             data_list.push(data);
@@ -123,6 +115,8 @@ router.get('/', function(req, res){
               id : magazineData[i].magazine_id,
               imageUrl : magazineData[i].magazine_image_url,
               title : magazineData[i].magazine_title,
+              width : null,
+              height : null,
               from : 4
             };
             data_list.push(data);
@@ -132,7 +126,7 @@ router.get('/', function(req, res){
       });
     },
     function(magazineData, restaurantData, myRecipeData, userEmail, connection, callback){
-      let getSaveRecipePhotoQuery = 'select save.my_savelist_id, origin.myrecipe_id, origin.myrecipe_image_url '+
+      let getSaveRecipePhotoQuery = 'select save.my_savelist_id, origin.myrecipe_id, origin.myrecipe_image_url, origin.myrecipe_image_w, origin.myrecipe_image_h '+
       'from my_savelist save inner join my_recipe origin '+
       'on save.my_savelist_origin_id = origin.myrecipe_id and save.my_savelist_from = 2 and save.user_email = ? '+
       'order by save.my_savelist_id desc '+
@@ -154,6 +148,8 @@ router.get('/', function(req, res){
               imageUrl : saveRecipePhoto[i].myrecipe_image_url,
               title : null,
               from : 2,
+              width : saveRecipePhoto[i].myrecipe_image_w,
+              height : saveRecipePhoto[i].myrecipe_image_w,
               checkSaveList : true,
               forSort : saveRecipePhoto[i].my_savelist_id
             };
@@ -185,6 +181,8 @@ router.get('/', function(req, res){
               imageUrl : saveRestaurant[i].restaurant_image_url,
               title : null,
               from : 3,
+              width : null,
+              height : null,
               checkSaveList : true,
               forSort : saveRestaurant[i].my_savelist_id
             };
@@ -216,6 +214,8 @@ router.get('/', function(req, res){
               imageUrl : saveMagazine[i].magazine_image_url,
               title : saveMagazine[i].magazine_title,
               from : 4,
+              width : null,
+              height : null,
               checkSaveList : true,
               forSort : saveMagazine[i].my_savelist_id
             };

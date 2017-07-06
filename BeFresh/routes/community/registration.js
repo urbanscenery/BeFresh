@@ -25,7 +25,7 @@ router.post('/',upload.single('image'), function(req, res){
   let task_array = [
     //1. connection 설정
     function(callback){
-			pool.getConnection(function(err, connection){
+      pool.getConnection(function(err, connection){
 				if(err){
           res.status(500).send({
             msg : "500 Connection error"
@@ -51,15 +51,20 @@ router.post('/',upload.single('image'), function(req, res){
     },
     function(userEmail, connection, callback){
       let registQuery = 'insert into my_recipe set ?';
-//      if((req.body.title == null)||(req.body.content == null)||(req.file == null))
-      let imageUrl = req.file.location; //이미지 url없이 등록불가능
+      let imageUrl = req.file.location;
+      let width = 1;
+      let height = 1;
+      if(req.body.width !==0) width = req.body.width;
+      if(req.body.height !==0) height = req.body.height;
       let data = {
         myrecipe_title : req.body.title,
         myrecipe_text : req.body.content,
         myrecipe_image_url : imageUrl,
         myrecipe_count : 0,
         user_email : userEmail,
-        myrecipe_post_time : moment().format('YYYY-MM-DD, h:mm:ss a')
+        myrecipe_post_time : moment().format('YYYY-MM-DD, h:mm:ss a'),
+        myrecipe_image_w : width,
+        myrecipe_image_h : height
       };
       connection.query(registQuery, data, function(err){
         if(err){

@@ -103,6 +103,7 @@ router.post('/', function(req, res){
 
 	//SNS로 로그인시
 	else{
+		console.log(req.body);
 		let task_array = [
 			//1. connection설정
 			function(callback){
@@ -129,7 +130,7 @@ router.post('/', function(req, res){
 			function(userdata, connection, callback){
 				if(userdata.length===0){
 						let insertSNSQuery = 'insert into users values(?,?,?,?,?,?)';
-						connection.query(query, [req.body.email, null, req.body.name, 'N',req.body.uid, 0], function(err){
+						connection.query(insertSNSQuery, [req.body.email, null, req.body.name, 'N',req.body.uid, 0], function(err){
 							if (err) {
 			          res.status(501).send({
 			            msg : "insert user data error"
@@ -140,7 +141,9 @@ router.post('/', function(req, res){
 							else callback(null, req.body.email, req.body.name, connection);
 						});
 					}
-				callback(null,userdata[0].user_email, userdata[0].user_name, connection);
+				else{
+					callback(null,userdata[0].user_email, userdata[0].user_name, connection);
+				}
 			},
 			function(userEmail, userName, connection, callback){
 				const secret = req.app.get('jwt-secret');
