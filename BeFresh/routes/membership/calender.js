@@ -4,7 +4,7 @@ const aws = require('aws-sdk');
 const async = require('async');
 const router = express.Router();
 const moment = require('moment');
-aws.config.loadFromPath('./config/aws_config.json');
+aws.config.loadFromPath('../config/aws_config.json');
 const pool = require('../../config/db_pool');
 const mysql = require('mysql');
 const jwt = require('jsonwebtoken');
@@ -66,7 +66,10 @@ router.post('/', function(req, res){
     function(data, userEmail, connection, callback){
       let getRefusedQuery = "select refused_date from refused "+
       "where user_email = ? and refused_date between ? and ?";
-      connection.query(getRefusedQuery, [userEmail, moment().week(), moment().week()+2], function(err, refusedDate){
+      let queryData;
+      if(moment().day()<4) queryData = [userEmail, moment().week(), moment().week()+2];
+      else queryData = [userEmail, moment().week()+1, moment().week()+3];
+      connection.query(getRefusedQuery, queryData, function(err, refusedDate){
         if(err){
           res.status(500).send({
             msg : "500 Get refused week data error"
@@ -78,7 +81,9 @@ router.post('/', function(req, res){
           if(refusedDate.length === 0 ) callback(null, data, userEmail, connection);
           else{
             let date = [];
-            let thisWeek = moment().week();
+            let thisWeek;
+            if(moment().day()<4) thisWeek = moment().week();
+            else thisWeek = moment().week()+1;
             for(let i = 0; i < refusedDate.length;i++){
                let index = refusedDate[i].refused_date - thisWeek;
                console.log(index);
