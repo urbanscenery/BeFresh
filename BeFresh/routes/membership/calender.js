@@ -4,7 +4,7 @@ const aws = require('aws-sdk');
 const async = require('async');
 const router = express.Router();
 const moment = require('moment');
-aws.config.loadFromPath('../config/aws_config.json');
+aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 const mysql = require('mysql');
 const jwt = require('jsonwebtoken');
