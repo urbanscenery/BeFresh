@@ -38,17 +38,16 @@ router.post('/time', function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      let getRecipeQuery;
-      if(req.body.overthirty == 0){
-        getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag, recipe_post_time from recipes '+
-        "where recipe_cookingTime < 30 and recipe_category = 'W' and recipe_post_time <= week(?) "+
-        'order by recipe_post_time desc';
+      let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag, recipe_post_time from recipes '+
+      "where recipe_category = 'W' and recipe_post_time <= week(?) ";
+      if(req.body.under == 1){
+        getRecipeQuery += 'and recipe_cookingTime < 30 ';
       }
-      else{
-        getRecipeQuery = 'select recipe_id, recipe_title, recipe_image, recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag, recipe_post_time from recipes '+
-        "where recipe_cookingTime >= 30 and recipe_category = 'W' and recipe_post_time <= week(?) "+
-        'order by recipe_post_time desc';
+      else if(req.body.over ==1){
+        getRecipeQuery += "and recipe_cookingTime >= 30 ";
       }
+      getRecipeQuery +='order by recipe_post_time desc';
+
 
       let data_list = [];
       connection.query(getRecipeQuery, moment().format('YYYY-MM-DD'), function(err, fromTime){

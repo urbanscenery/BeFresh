@@ -49,6 +49,7 @@ router.post('/', function(req, res){
           callback("get userGroup query err : "+err);
         }
         else{
+		  console.log(req.body.date);
           let monday = moment(req.body.date).day(1).format('MM.DD');
           let sunday = moment(req.body.date).day(7).format('MM.DD');
           let data = {

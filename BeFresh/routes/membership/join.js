@@ -19,7 +19,7 @@ function chkZipcode(str){
 }
 
 function chkAddress(str){
-  var address = /^((?:[가-힣]*\s*([0-9가-힣-/])){0,66})$/;
+  var address = /^((?:[가-힣]*\s*([0-9가-힣-/\(\),])){0,150})$/;
   if(!address.test(str)){
     return false;
   }

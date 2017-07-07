@@ -11,12 +11,12 @@ const pool = require('../../config/db_pool');
 
 /*
 var j = schedule.scheduleJob('0 * * * * *', function(){
-  console.log(moment().format('YYYY-MM-DD, h:mm:ss a'));
+  console.log(moment().format('YYYYMMDDhhmmss'));
 });
 */
 
 //#################################이거 고쳐야함 목요일에 되는걸로!!!
-const autoAddDeriveried = schedule.scheduleJob('0 0 0 * * TUE *', function(){
+const autoAddDeriveried = schedule.scheduleJob('0 40 4 * * FRI *', function(){
   let currentTime = moment().format('YYYY-MM-DD');
   let task_array = [
     function(callback){
@@ -32,7 +32,7 @@ const autoAddDeriveried = schedule.scheduleJob('0 0 0 * * TUE *', function(){
 		},
     function(connection, callback){
       let getRecipeQuery = 'select recipe_id from recipes '+
-      "where recipe_post_time = week(?) and recipe_category = 'W'";
+      "where recipe_post_time = week('2017-06-08') and recipe_category = 'W'";
       connection.query(getRecipeQuery, currentTime, function(err, thisweek){
         if(err){
           connection.release();
@@ -50,7 +50,7 @@ const autoAddDeriveried = schedule.scheduleJob('0 0 0 * * TUE *', function(){
     },
     function(wellbeingID, connection, callback){
       let getRecipeQuery = 'select recipe_id from recipes '+
-      "where recipe_post_time = week(?) and recipe_category = 'V'";
+      "where recipe_post_time = week('2017-06-08') and recipe_category = 'V'";
       connection.query(getRecipeQuery, currentTime, function(err, thisweek){
         if(err){
           connection.release();

@@ -12,7 +12,7 @@ const moment = require('moment');
 const saltRounds = 10;
 
 router.post('/', function(req, res){
-	if(req.body.uid === null){
+	if(req.body.uid == 1){
 		let task_array = [
 			//1. connection설정
 			function(callback){

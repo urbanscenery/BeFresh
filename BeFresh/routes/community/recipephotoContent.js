@@ -169,7 +169,7 @@ router.post('/comment', function(req, res){
       let registCommentQuery = 'insert into my_recipe_comment set ?';
       let data = {
         myrecipe_comment_text : req.body.comment,
-        myrecipe_comment_post_time : moment().format('YYYY-MM-DD, h:mm:ss a'),
+        myrecipe_comment_post_time : moment().format('YYYYMMDDhhmmss'),
         myrecipe_id : req.body.id,
         user_email : userEmail
       };

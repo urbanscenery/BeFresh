@@ -50,6 +50,8 @@ router.get('/:id', function(req,res){
           let data = {
             id : contentData[0].magazine_id,
             content : contentData[0].magazine_content_image_url,
+            width : contentData[0].magazine_content_w,
+            height : contentData[0].magazine_content_h,
             checkSaveList : false
           };
           callback(null, data, userEmail, connection);

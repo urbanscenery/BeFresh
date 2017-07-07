@@ -38,7 +38,7 @@ router.get('/recipephoto', function(req, res){
       });
     },
     function(userEmail, connection, callback){
-      let getSaveRecipePhotoQuery = 'select save.my_savelist_id, origin.myrecipe_id, origin.myrecipe_title, origin.myrecipe_image_url '+
+      let getSaveRecipePhotoQuery = 'select save.my_savelist_id, origin.myrecipe_id, origin.myrecipe_title, origin.myrecipe_image_url, origin.myrecipe_image_w, origin.myrecipe_image_h '+
       'from my_savelist save inner join my_recipe origin '+
       'on save.my_savelist_origin_id = origin.myrecipe_id and save.my_savelist_from = 2 and save.user_email = ? '+
       'order by save.my_savelist_id desc';
@@ -58,6 +58,8 @@ router.get('/recipephoto', function(req, res){
               id : saveRecipePhoto[i].myrecipe_id,
               imageUrl : saveRecipePhoto[i].myrecipe_image_url,
               title : saveRecipePhoto[i].myrecipe_title,
+              width : saveRecipePhoto[i].myrecipe_image_w,
+              height : saveRecipePhoto[i].myrecipe_image_h,
               checkSaveList : true
             };
             data_list.push(data);

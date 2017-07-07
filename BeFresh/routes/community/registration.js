@@ -62,7 +62,7 @@ router.post('/',upload.single('image'), function(req, res){
         myrecipe_image_url : imageUrl,
         myrecipe_count : 0,
         user_email : userEmail,
-        myrecipe_post_time : moment().format('YYYY-MM-DD, h:mm:ss a'),
+        myrecipe_post_time : moment().format('YYYYMMDDhhmmss'),
         myrecipe_image_w : width,
         myrecipe_image_h : height
       };

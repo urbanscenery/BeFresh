@@ -98,11 +98,12 @@ router.post('/registration', function(req, res){
       });
     },
     function(userEmail, connection, callback){
+      console.log(req.body.id);
       let registReviewQuery = 'insert into reviews set ?';
       let data = {
         review_content : req.body.content,
         review_score : req.body.score,
-        review_post_time : moment().format('YYYY-MM-DD, h:mm:ss a'),
+        review_post_time : moment().format('YYYYMMDDhhmmss'),
         recipe_id : req.body.id,
         user_email : userEmail
       };

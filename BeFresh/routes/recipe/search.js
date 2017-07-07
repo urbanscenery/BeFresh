@@ -8,8 +8,27 @@ const moment = require('moment');
 aws.config.loadFromPath('./config/aws_config.json');
 const pool = require('../../config/db_pool');
 
+function chkSearch(str){
+  var search = /^((?:[가-힣0-9]*\s*([0-9가-힣])){0,66})$/;
+  if(!search.test(str)){
+    return false;
+  }
+  return true;
+}
+
+
+
 router.get('/:searching', function(req, res){
   let task_array = [
+    function(callback){
+      if(!chkSearch(req.params.searching)){
+        res.status(401).send({
+          msg : "Useless searching keyword"
+        });
+        callback("usless searching keyword");
+      }
+      else callback(null);
+    },
     //1. connection 설정
     function(callback){
 			pool.getConnection(function(err, connection){
@@ -39,7 +58,7 @@ router.get('/:searching', function(req, res){
     function(userEmail, connection, callback){
       let getRecipeQuery = 'select recipe_id, recipe_title, recipe_image ,recipe_subtitle, recipe_difficulty, recipe_cookingTime, recipe_tag '+
       'from recipes '+
-      'where recipe_title like ? or recipe_subtitle like ? or recipe_description like ? or recipe_method like ? or recipe_tag like ? or recipe_material like ?';
+      'where recipe_title like ? or recipe_subtitle like ? or recipe_tag like ?';
       let data_list = [];
       let search = [];
       for(let k = 0 ; k < 6 ; k++){
