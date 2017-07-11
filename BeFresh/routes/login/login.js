@@ -3,7 +3,7 @@ const express = require('express');
 const aws = require('aws-sdk');
 const async = require('async');
 const router = express.Router();
-aws.config.loadFromPath('./config/aws_config.json');
+aws.config.loadFromPath('../config/aws_config.json');
 const pool = require('../../config/db_pool');
 const mysql = require('mysql');
 const jwt = require('jsonwebtoken');
@@ -128,9 +128,14 @@ router.post('/', function(req, res){
 			},
 			//3. 입력된 email이 없을시 이메일이 없다고함, 비밀번호 틀릴시 비밀번호 틀렸다고함
 			function(userdata, connection, callback){
+				let email = req.body.email;
+				if(req.body.email == ""){
+					email = req.body.name + "@facebook.com";
+				}
 				if(userdata.length===0){
 						let insertSNSQuery = 'insert into users values(?,?,?,?,?,?)';
-						connection.query(insertSNSQuery, [req.body.email, null, req.body.name, 'N',req.body.uid, 0], function(err){
+
+						connection.query(insertSNSQuery, [email, null, req.body.name, 'N',req.body.uid, 0], function(err){
 							if (err) {
 			          res.status(501).send({
 			            msg : "insert user data error"
@@ -138,7 +143,7 @@ router.post('/', function(req, res){
 			          connection.release();
 			          callback("insert error : " + err, null);
 			        }
-							else callback(null, req.body.email, req.body.name, connection);
+							else callback(null, email, req.body.name, connection);
 						});
 					}
 				else{
