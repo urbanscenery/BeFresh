@@ -5,7 +5,7 @@ const async = require('async');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
-aws.config.loadFromPath('./config/aws_config.json');
+aws.config.loadFromPath('../config/aws_config.json');
 const pool = require('../../config/db_pool');
 
 router.get('/wellbeing', function(req, res){
@@ -49,6 +49,8 @@ router.get('/wellbeing', function(req, res){
           callback("getRecipeQuery err : "+ err, null);
         }
         else{
+			console.log(currentTime);
+			console.log(currentWeek);
           let currentData;
           if(currentWeek.length === 0){
             currentData = null;

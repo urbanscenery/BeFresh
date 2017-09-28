@@ -59,7 +59,7 @@ router.get('/', function(req, res){
           callback(null, "succesful find user group");
         }
       });
-    }
+    },
   ];
   async.waterfall(task_array, function(err, result) {
     if (err){
